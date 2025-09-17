@@ -1,8 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getUser } from "@/lib/auth"
+import { H } from '@highlight-run/next/server';
 
 export async function GET(request: NextRequest) {
   try {
+    console.info('🚀 API Route: /api/test-backend called')
+    
+    // Track the API call with Highlight
+    H.track('API Call', {
+      endpoint: '/api/test-backend',
+      method: 'GET',
+      timestamp: new Date().toISOString()
+    });
+    
     // Test authentication
     const user = await getUser()
 
@@ -35,15 +45,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: "✅ AgriNetra Backend Fully Operational",
       timestamp: new Date().toISOString(),
+      tracing: {
+        highlight: "✅ Enabled",
+        opentelemetry: "✅ Enabled"
+      },
       ...testData,
     })
+
   } catch (error) {
+    console.error('Backend test failed:', error)
+    
+    // Track error with Highlight
+    H.consumeError(error as Error, {
+      category: 'API',
+      level: 'error'
+    });
+    
     return NextResponse.json(
-      {
-        status: "❌ Backend Error",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
+      { status: 'error', message: 'Backend test failed' },
+      { status: 500 }
     )
   }
 }

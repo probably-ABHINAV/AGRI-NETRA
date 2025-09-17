@@ -1,13 +1,15 @@
-
 'use client'
 
-import Navigation from '@/components/navigation'
+import { ReactNode } from "react";
+import Navigation from "./navigation";
+import { useHighlightIdentification } from "@/hooks/use-highlight";
 
 interface AppShellProps {
-  children: React.ReactNode
+  children: ReactNode;
 }
 
 export default function AppShell({ children }: AppShellProps) {
+  useHighlightIdentification();
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -17,3 +19,5 @@ export default function AppShell({ children }: AppShellProps) {
     </div>
   )
 }
+
+export { AppShell }

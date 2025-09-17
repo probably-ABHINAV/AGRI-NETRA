@@ -1,10 +1,22 @@
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types'
 
-import { createClient } from '@supabase/supabase-js'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Export the createClient function for use in other modules
+export const createClient = () =>
+  supabaseUrl && supabaseAnonKey
+  ? createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey)
+  : null
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Helper function to check if Supabase is available
+export const isSupabaseConfigured = () => {
+  return !!(supabaseUrl && supabaseAnonKey)
+}
+
+// Create a default instance for server-side use
+export const supabase = createClient()
 
 // Database types based on your schema
 export interface Profile {

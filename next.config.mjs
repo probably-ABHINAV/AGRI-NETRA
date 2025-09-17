@@ -13,6 +13,12 @@ const nextConfig = {
   experimental: {
     allowedRevalidateHeaderKeys: [],
   },
+  // Allow Replit origins for development
+  allowedDevOrigins: ['*.repl.co'],
+  // Configure for Replit environment
+  async rewrites() {
+    return [];
+  },
   async headers() {
     return [
       {
@@ -25,6 +31,10 @@ const nextConfig = {
         ],
       },
     ]
+  },
+  // Allow all hosts - critical for Replit proxy
+  async redirects() {
+    return [];
   },
 }
 

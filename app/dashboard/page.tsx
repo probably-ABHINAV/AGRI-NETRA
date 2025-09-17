@@ -68,9 +68,11 @@ const mockSensorData = [
 ]
 
 export default function DashboardPage() {
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
 
   useEffect(() => {
+    // Set initial time only on client to prevent hydration mismatch
+    setCurrentTime(new Date())
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
@@ -124,13 +126,19 @@ export default function DashboardPage() {
                 <span className="text-2xl font-bold text-gray-900">AgriNetra</span>
               </div>
               <div className="hidden md:block text-sm text-gray-500">
-                {currentTime.toLocaleDateString("en-IN", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-                , {currentTime.toLocaleTimeString("en-IN", { hour12: true })}
+                {currentTime ? (
+                  <>
+                    {currentTime.toLocaleDateString("en-IN", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                    , {currentTime.toLocaleTimeString("en-IN", { hour12: true })}
+                  </>
+                ) : (
+                  "Loading..."
+                )}
               </div>
             </div>
 

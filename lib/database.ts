@@ -1,5 +1,5 @@
 // Database operations with Supabase integration
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 import type { Profile, Farm, Crop } from './supabase'
 
 export interface User {
@@ -20,10 +20,6 @@ export interface FarmData {
   irrigationType: string
 }
 
-// Check if Supabase is configured
-const isSupabaseConfigured = () => {
-  return process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-}
 
 // Mock data for development
 const mockFarms = [
@@ -52,6 +48,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .insert([{
@@ -92,6 +92,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -127,6 +131,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('farms')
         .insert([{
@@ -155,6 +163,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('farms')
         .select('*')
@@ -192,6 +204,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('crops')
         .select('*')
@@ -211,6 +227,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('crops')
         .select('*')
@@ -235,6 +255,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('regions')
         .select('*')
@@ -254,6 +278,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('farms')
         .select('*')
@@ -269,12 +297,16 @@ export const db = {
   },
 
   // Crop operations - missing functions
-  async getCrops(farmId: string): Promise<any[]> {
+  async getFarmCrops(farmId: string): Promise<any[]> {
     if (!isSupabaseConfigured()) {
       return []
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('farm_crops')
         .select('*')
@@ -283,7 +315,7 @@ export const db = {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching crops:', error)
+      console.error('Error fetching farm crops:', error)
       return []
     }
   },
@@ -299,6 +331,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('farm_crops')
         .insert([cropData])
@@ -320,6 +356,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('crop_recommendations')
         .select('*')
@@ -344,6 +384,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('crop_recommendations')
         .insert([recData])
@@ -365,6 +409,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('pest_alerts')
         .select('*')
@@ -389,6 +437,10 @@ export const db = {
     }
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { data, error } = await supabase
         .from('pest_alerts')
         .insert([alertData])

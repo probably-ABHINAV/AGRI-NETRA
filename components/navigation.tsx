@@ -12,7 +12,7 @@ import {
   BarChart3,
   Brain,
   Bug,
-  Sensors,
+  Zap,
   MessageSquare,
   Settings,
   Menu,
@@ -26,7 +26,7 @@ import { LanguageSelector } from '@/components/language-selector'
 import { useLanguage } from '@/hooks/use-language'
 import { logoutAction } from '@/app/actions/auth'
 
-export default function Navigation() {
+function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const { t } = useLanguage()
@@ -35,7 +35,7 @@ export default function Navigation() {
     { name: "Dashboard", href: "/dashboard", icon: Home, adminOnly: false },
     { name: "Crop Recommendations", href: "/crop-recommendations", icon: Brain, adminOnly: false },
     { name: "Pest Detection", href: "/pest-detection", icon: Bug, adminOnly: false },
-    { name: "IoT Sensors", href: "/sensors", icon: Sensors, adminOnly: false },
+    { name: "IoT Sensors", href: "/sensors", icon: Zap, adminOnly: false },
     { name: "Analytics", href: "/analytics", icon: BarChart3, adminOnly: false },
     { name: "Expert Chat", href: "/chat", icon: MessageSquare, badge: 3, adminOnly: false },
     { name: "Admin Panel", href: "/admin", icon: Shield, adminOnly: true },
@@ -184,3 +184,6 @@ export default function Navigation() {
     </>
   )
 }
+
+export default Navigation
+export { Navigation }

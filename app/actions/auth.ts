@@ -1,5 +1,4 @@
-
-'use server'
+'use server';
 
 import { redirect } from 'next/navigation'
 import { login, logout } from '@/lib/auth'
@@ -59,7 +58,7 @@ export async function registerAction(formData: FormData) {
 
     // Mock registration - in production, save to database
     console.log('Registering user:', { email, name })
-    
+
     redirect('/auth/login?message=Registration successful! Please login.')
   } catch (error) {
     console.error('Registration error:', error)

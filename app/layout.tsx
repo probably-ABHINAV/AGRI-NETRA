@@ -7,6 +7,7 @@ import AppShell from "@/components/app-shell"
 import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 import { LanguageProvider } from "@/hooks/use-language"
+import HighlightProvider from "@/components/highlight-provider"
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -66,14 +67,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${montserrat.variable} ${openSans.variable} antialiased`}>
       <body className="font-sans antialiased">
-        <ErrorBoundary>
-          <LanguageProvider>
-            <AppShell>
-              <Suspense fallback={null}>{children}</Suspense>
-            </AppShell>
-          </LanguageProvider>
-        </ErrorBoundary>
-        <Analytics />
+        <HighlightProvider>
+          <ErrorBoundary>
+            <LanguageProvider>
+              <AppShell>
+                <Suspense fallback={null}>{children}</Suspense>
+              </AppShell>
+            </LanguageProvider>
+          </ErrorBoundary>
+          <Analytics />
+        </HighlightProvider>
       </body>
     </html>
   )
