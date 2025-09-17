@@ -1,46 +1,64 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getUser } from "@/lib/auth"
-import { db } from "@/lib/database"
+
+import { NextRequest, NextResponse } from 'next/server'
+import { getUser } from '@/lib/auth'
+
+// In-memory storage for demo
+let farms: Array<{
+  id: string
+  name: string
+  location: string
+  size: number
+  soilType: string
+  userId: string
+  createdAt: string
+}> = []
 
 export async function GET() {
   try {
     const user = await getUser()
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const farms = await db.getFarms(user.id)
-    return NextResponse.json({ farms })
+    const userFarms = farms.filter(farm => farm.userId === user.email)
+    return NextResponse.json({ success: true, data: userFarms })
   } catch (error) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error('Error fetching farms:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const user = await getUser()
-    if (!user || user.role !== "farmer") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
-    const { name, location, size, soilType, irrigationType } = body
-
-    if (!name || !location || !size) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    
+    // Validate required fields
+    if (!body.name || !body.location || !body.size || !body.soilType) {
+      return NextResponse.json(
+        { error: 'Missing required fields: name, location, size, soilType' }, 
+        { status: 400 }
+      )
     }
 
-    const farm = await db.createFarm({
-      name,
-      ownerId: user.id,
-      location,
-      size: Number.parseFloat(size),
-      soilType: soilType || "Unknown",
-      irrigationType: irrigationType || "Traditional",
-    })
+    const farm = {
+      id: `farm-${farms.length + 1}`,
+      name: body.name,
+      location: body.location,
+      size: Number(body.size),
+      soilType: body.soilType,
+      userId: user.email,
+      createdAt: new Date().toISOString(),
+    }
 
-    return NextResponse.json({ farm }, { status: 201 })
+    farms.push(farm)
+    return NextResponse.json({ success: true, data: farm }, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error('Error creating farm:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

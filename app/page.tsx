@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Sprout,
   Users,
@@ -24,8 +26,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useLanguage } from "@/hooks/use-language"
+import LanguageSelector from "@/components/language-selector"
 
 export default function HomePage() {
+  const { t, userState } = useLanguage()
+
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-effect border-b border-border/50 sticky top-0 z-50 backdrop-blur-xl">
@@ -113,6 +119,17 @@ export default function HomePage() {
             Revolutionize your agricultural operations with cutting-edge AI technology, real-time monitoring, and expert
             insights that maximize yields while minimizing environmental impact.
           </p>
+
+          {/* Language Selection Banner */}
+          {!userState && (
+            <section className="bg-green-600 text-white py-3">
+              <div className="container mx-auto px-4 text-center">
+                <p className="text-sm">
+                  {t('common.selectYourState') || 'Select your state for localized farming advice in your language'}
+                </p>
+              </div>
+            </section>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-slide-up">
             <Button
@@ -284,11 +301,11 @@ export default function HomePage() {
       </section>
 
       {/* How it Works section */}
-      <section id="how-it-works" className="py-20 px-4 bg-white">
+      <section id="how-it-works" className="py-20 px-4 bg-card/30">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">How AgriNetra Works</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-foreground mb-4">How AgriNetra Works</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Simple steps to transform your farming with smart technology
             </p>
           </div>
@@ -299,7 +316,7 @@ export default function HomePage() {
                 1
               </div>
               <h3 className="text-xl font-semibold mb-3">Setup Your Farm</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Register your farm details, location, and current crops. Connect IoT sensors for monitoring.
               </p>
             </div>
@@ -309,7 +326,7 @@ export default function HomePage() {
                 2
               </div>
               <h3 className="text-xl font-semibold mb-3">Get AI Insights</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Receive personalized recommendations, pest alerts, and weather-based farming advice.
               </p>
             </div>
@@ -319,7 +336,7 @@ export default function HomePage() {
                 3
               </div>
               <h3 className="text-xl font-semibold mb-3">Optimize & Grow</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Implement recommendations, track progress, and continuously improve your yields.
               </p>
             </div>

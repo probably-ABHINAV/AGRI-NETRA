@@ -60,8 +60,26 @@ export default function SignupPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input id="location" name="location" placeholder="City, State" />
+                <Label htmlFor="state">State</Label>
+                <Select name="state">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="punjab">Punjab</SelectItem>
+                    <SelectItem value="maharashtra">Maharashtra</SelectItem>
+                    <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
+                    <SelectItem value="uttar-pradesh">Uttar Pradesh</SelectItem>
+                    <SelectItem value="karnataka">Karnataka</SelectItem>
+                    <SelectItem value="west-bengal">West Bengal</SelectItem>
+                    <SelectItem value="rajasthan">Rajasthan</SelectItem>
+                    <SelectItem value="kerala">Kerala</SelectItem>
+                    <SelectItem value="gujarat">Gujarat</SelectItem>
+                    <SelectItem value="haryana">Haryana</SelectItem>
+                    <SelectItem value="bihar">Bihar</SelectItem>
+                    <SelectItem value="odisha">Odisha</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

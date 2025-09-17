@@ -3,8 +3,10 @@ import type { Metadata } from "next"
 import { Montserrat, Open_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
-import Navigation from "@/components/navigation"
+import AppShell from "@/components/app-shell"
+import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
+import { LanguageProvider } from "@/hooks/use-language"
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -64,12 +66,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${montserrat.variable} ${openSans.variable} antialiased`}>
       <body className="font-sans antialiased">
-        <Navigation />
-        <div className="lg:pl-64">
-          <main>
-            <Suspense fallback={null}>{children}</Suspense>
-          </main>
-        </div>
+        <ErrorBoundary>
+          <LanguageProvider>
+            <AppShell>
+              <Suspense fallback={null}>{children}</Suspense>
+            </AppShell>
+          </LanguageProvider>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>
