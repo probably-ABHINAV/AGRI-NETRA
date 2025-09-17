@@ -9,27 +9,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const farmId = searchParams.get("farmId")
-
-    if (!farmId) {
-      return NextResponse.json({ error: "Farm ID is required" }, { status: 400 })
-    }
-
-    // Verify user owns the farm
-    const { db } = await import("@/lib/database")
-    const farm = await db.getFarm(farmId)
-    if (!farm || farm.ownerId !== user.id) {
-      return NextResponse.json({ error: "Farm not found" }, { status: 404 })
-    }
-
-    const subscribersCount = realtimeService.getSubscribersCount(farmId)
+    const status = realtimeService.getStatus()
 
     return NextResponse.json({
-      farmId,
-      subscribersCount,
-      isActive: subscribersCount > 0,
-      status: "success",
+      ...status,
+      timestamp: new Date().toISOString(),
+      uptime: Date.now(), // Mock uptime
+      version: "1.0.0"
     })
   } catch (error) {
     console.error("Realtime status error:", error)

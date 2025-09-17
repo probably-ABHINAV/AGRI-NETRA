@@ -16,7 +16,8 @@ export interface RealtimeSubscription {
 }
 
 class RealtimeService {
-  private subscriptions: Map<string, RealtimeSubscription[]> = new Map()
+  private clients: Set<any> = new Set()
+  private connectionStatus: 'connected' | 'disconnected' = 'disconnected'
   private simulationIntervals: Map<string, NodeJS.Timeout> = new Map()
 
   // Subscribe to real-time updates for a farm
@@ -55,13 +56,37 @@ class RealtimeService {
 
   // Broadcast message to all subscribers
   broadcast(message: WebSocketMessage) {
-    const subs = this.subscriptions.get(message.farmId)
-    if (subs) {
-      subs.forEach((sub) => {
-        if (sub.types.includes(message.type)) {
-          sub.callback(message)
-        }
-      })
+    // Mock implementation for development
+    console.log('Broadcasting message:', message)
+
+    // In a real implementation, this would send to WebSocket clients
+    // For now, we'll just log the message
+    this.simulateBroadcast(message)
+  }
+
+  private simulateBroadcast(message: any) {
+    // Simulate broadcasting to connected clients
+    setTimeout(() => {
+      console.log(`Message broadcasted to ${this.clients.size} clients:`, message)
+    }, 100)
+  }
+
+  addClient(client: any) {
+    this.clients.add(client)
+    this.connectionStatus = 'connected'
+  }
+
+  removeClient(client: any) {
+    this.clients.delete(client)
+    if (this.clients.size === 0) {
+      this.connectionStatus = 'disconnected'
+    }
+  }
+
+  getStatus() {
+    return {
+      status: this.connectionStatus,
+      connectedClients: this.clients.size
     }
   }
 

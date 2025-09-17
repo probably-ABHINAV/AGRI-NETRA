@@ -245,5 +245,161 @@ export const db = {
       console.error('Error fetching regions:', error)
       return []
     }
+  },
+
+  // Farm operations - missing functions
+  async getFarm(farmId: string): Promise<any> {
+    if (!isSupabaseConfigured()) {
+      return mockFarms.find(farm => farm.id === farmId) || null
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('farms')
+        .select('*')
+        .eq('id', farmId)
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error fetching farm:', error)
+      return null
+    }
+  },
+
+  // Crop operations - missing functions
+  async getCrops(farmId: string): Promise<any[]> {
+    if (!isSupabaseConfigured()) {
+      return []
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('farm_crops')
+        .select('*')
+        .eq('farm_id', farmId)
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error fetching crops:', error)
+      return []
+    }
+  },
+
+  async createCrop(cropData: any): Promise<any> {
+    if (!isSupabaseConfigured()) {
+      const newCrop = {
+        id: `crop-${Date.now()}`,
+        ...cropData,
+        created_at: new Date().toISOString()
+      }
+      return newCrop
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('farm_crops')
+        .insert([cropData])
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error creating crop:', error)
+      throw error
+    }
+  },
+
+  // Recommendation operations
+  async getRecommendations(farmId: string): Promise<any[]> {
+    if (!isSupabaseConfigured()) {
+      return []
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('crop_recommendations')
+        .select('*')
+        .eq('farm_id', farmId)
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error fetching recommendations:', error)
+      return []
+    }
+  },
+
+  async createRecommendation(recData: any): Promise<any> {
+    if (!isSupabaseConfigured()) {
+      const newRec = {
+        id: `rec-${Date.now()}`,
+        ...recData,
+        created_at: new Date().toISOString()
+      }
+      return newRec
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('crop_recommendations')
+        .insert([recData])
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error creating recommendation:', error)
+      throw error
+    }
+  },
+
+  // Pest alert operations
+  async getPestAlerts(farmId: string): Promise<any[]> {
+    if (!isSupabaseConfigured()) {
+      return []
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('pest_alerts')
+        .select('*')
+        .eq('farm_id', farmId)
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error fetching pest alerts:', error)
+      return []
+    }
+  },
+
+  async createPestAlert(alertData: any): Promise<any> {
+    if (!isSupabaseConfigured()) {
+      const newAlert = {
+        id: `alert-${Date.now()}`,
+        ...alertData,
+        created_at: new Date().toISOString()
+      }
+      return newAlert
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('pest_alerts')
+        .insert([alertData])
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error creating pest alert:', error)
+      throw error
+    }
   }
 }

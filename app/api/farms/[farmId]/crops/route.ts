@@ -1,38 +1,47 @@
+
 import { type NextRequest, NextResponse } from "next/server"
 import { getUser } from "@/lib/auth"
-import { db } from "@/lib/database"
 
-export async function GET(request: NextRequest, { params }: { params: { farmId: string } }) {
+// Mock data for development
+let farmCrops: Array<{
+  id: string
+  farmId: string
+  name: string
+  variety: string
+  plantingDate: string
+  expectedHarvestDate: string
+  area: number
+  status: string
+}> = []
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { farmId: string } }
+) {
   try {
     const user = await getUser()
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Verify user owns the farm
-    const farm = await db.getFarm(params.farmId)
-    if (!farm || farm.ownerId !== user.id) {
-      return NextResponse.json({ error: "Farm not found" }, { status: 404 })
-    }
-
-    const crops = await db.getCrops(params.farmId)
+    // Filter crops for this farm
+    const crops = farmCrops.filter(crop => crop.farmId === params.farmId)
+    
     return NextResponse.json({ crops })
   } catch (error) {
+    console.error("Error fetching crops:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { farmId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { farmId: string } }
+) {
   try {
     const user = await getUser()
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    // Verify user owns the farm
-    const farm = await db.getFarm(params.farmId)
-    if (!farm || farm.ownerId !== user.id) {
-      return NextResponse.json({ error: "Farm not found" }, { status: 404 })
     }
 
     const body = await request.json()
@@ -42,20 +51,22 @@ export async function POST(request: NextRequest, { params }: { params: { farmId:
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const crop = await db.createCrop({
+    const crop = {
+      id: `crop-${Date.now()}`,
       farmId: params.farmId,
       name,
       variety: variety || "Unknown",
-      plantingDate: new Date(plantingDate),
-      expectedHarvestDate: expectedHarvestDate
-        ? new Date(expectedHarvestDate)
-        : new Date(Date.now() + 120 * 24 * 60 * 60 * 1000), // 120 days default
+      plantingDate: plantingDate,
+      expectedHarvestDate: expectedHarvestDate || new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString(),
       area: Number.parseFloat(area),
       status: "planted",
-    })
+    }
+
+    farmCrops.push(crop)
 
     return NextResponse.json({ crop }, { status: 201 })
   } catch (error) {
+    console.error("Error creating crop:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

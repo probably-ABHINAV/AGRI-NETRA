@@ -43,6 +43,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
+    // Verify user owns the farm
+    const farm = await db.getFarm(farmId)
+    if (!farm || farm.ownerId !== user.email) {
+      return NextResponse.json({ error: "Farm not found" }, { status: 404 })
+    }
+
+    const alert = await db.createPestAlert({
+      farmId,
+      cropId,
+      pestType,
+      severity: severity || "medium",
+      description,
+      location,
+      imageUrl,
+      status: "active",
+      reportedBy: user.email
+    })
+
+    return NextResponse.json({ alert }, { status: 201 })
+  } catch (error) {
+    console.error("Error creating pest alert:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
     const alert = await db.createPestAlert({
       farmId,
       cropId,

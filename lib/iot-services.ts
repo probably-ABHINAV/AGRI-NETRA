@@ -254,4 +254,64 @@ export const iotServices = {
 
     return commands
   },
+
+  // Get all sensors for a farm
+  async getSensors(farmId: string): Promise<SensorDevice[]> {
+    // Mock data - replace with actual IoT integration
+    return devices.filter((device) => device.farmId === farmId)
+  },
+
+  // Get sensor data for a specific time period
+  async getSensorData(sensorId: string, startDate: Date, endDate: Date): Promise<any[]> {
+    // Mock implementation
+    const mockData: any[] = []
+    const currentDate = new Date(startDate)
+
+    while (currentDate <= endDate) {
+      mockData.push({
+        id: `reading-${Date.now()}-${Math.random()}`,
+        sensorId,
+        value: 60 + Math.random() * 20, // Random moisture between 60-80%
+        unit: "%",
+        timestamp: new Date(currentDate),
+        quality: "good"
+      })
+      currentDate.setHours(currentDate.getHours() + 1)
+    }
+
+    return mockData
+  },
+
+  // Control irrigation system
+  async controlIrrigation(farmId: string, action: 'start' | 'stop', duration?: number): Promise<{ success: boolean; message: string }> {
+    // Mock implementation
+    return {
+      success: true,
+      message: `Irrigation ${action}ed successfully${duration ? ` for ${duration} minutes` : ''}`
+    }
+  },
+
+  // Get irrigation schedule
+  async getIrrigationSchedule(farmId: string): Promise<any[]> {
+    return [
+      {
+        id: 'schedule-1',
+        farmId,
+        time: '06:00',
+        duration: 30,
+        frequency: 'daily',
+        active: true
+      }
+    ]
+  },
+
+  // Create irrigation schedule
+  async createIrrigationSchedule(farmId: string, schedule: any): Promise<any> {
+    return {
+      id: `schedule-${Date.now()}`,
+      farmId,
+      ...schedule,
+      created_at: new Date().toISOString()
+    }
+  }
 }

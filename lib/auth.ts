@@ -55,7 +55,11 @@ export async function getSession() {
 export async function getUser() {
   const session = await getSession()
   if (!session) return null
-  return { email: session.userId, role: session.role }
+  return { 
+    id: session.userId, // Add id field for consistency
+    email: session.userId, 
+    role: session.role 
+  }
 }
 
 export async function updateSession(request: NextRequest) {
