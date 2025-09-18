@@ -90,6 +90,8 @@ export const translations: Translations = {
     'nav.logout': 'Logout',
     'nav.login': 'Login',
     'nav.signup': 'Sign Up',
+    'nav.settings': 'Settings',
+    'nav.admin': 'Admin Panel',
     
     // Common
     'common.welcome': 'Welcome',
@@ -124,6 +126,50 @@ export const translations: Translations = {
     'dashboard.recentActivity': 'Recent Activity',
     'dashboard.weatherUpdate': 'Weather Update',
     'dashboard.cropRecommendations': 'Crop Recommendations',
+    'dashboard.welcomeBack': 'Welcome back',
+    'dashboard.lastUpdated': 'Last updated',
+    'dashboard.activeFields': 'Active Fields',
+    'dashboard.activeSensors': 'Active Sensors',
+    'dashboard.currentCrops': 'Current Crops',
+    'dashboard.realtimeMonitoring': 'Real-time Monitoring',
+    'dashboard.alertsActions': 'Alerts & Quick Actions',
+    'dashboard.quickActions': 'Quick Actions',
+    'dashboard.cropManagement': 'Crop Management',
+    'dashboard.currentCropsOverview': 'Current Crops Overview',
+    'dashboard.growthProgress': 'Growth Progress',
+    'dashboard.estHarvest': 'Est. harvest',
+    'dashboard.farmSize': 'Farm Size',
+    'dashboard.hectares': 'hectares',
+    'dashboard.thisMonth': 'this month',
+    'dashboard.fieldsHarvesting': 'fields harvesting',
+    'dashboard.sensorsOffline': 'sensors offline',
+    'dashboard.peakGrowingSeason': 'Peak growing season',
+    'dashboard.currentConditions': 'Current conditions and 5-day forecast',
+    'dashboard.fiveDayForecast': '5-Day Forecast',
+    'dashboard.liveSensorData': 'Live Sensor Data',
+    'dashboard.latestIoTReadings': 'Latest IoT sensor readings',
+    'dashboard.recentAlerts': 'Recent Alerts',
+    'dashboard.importantNotifications': 'Important notifications from your farm',
+    'dashboard.commonTasks': 'Common tasks and features',
+    'dashboard.viewAllSensors': 'View All Sensors',
+    'dashboard.viewAllAlerts': 'View All Alerts',
+    'dashboard.field': 'Field',
+    
+    // Sensor data
+    'dashboard.sensors.soilMoisture': 'Soil Moisture',
+    'dashboard.sensors.temperature': 'Temperature',
+    'dashboard.sensors.phLevel': 'pH Level',
+    'dashboard.sensors.nitrogen': 'Nitrogen',
+    
+    // Status
+    'dashboard.status.low': 'Low',
+    'dashboard.status.high': 'High',
+    'dashboard.status.normal': 'Normal',
+    
+    // Alerts
+    'dashboard.alerts.soilMoistureLow': 'Soil moisture low in Field A',
+    'dashboard.alerts.weatherAlert': 'Weather alert: Heavy rain expected',
+    'dashboard.alerts.irrigationComplete': 'Irrigation completed in Field B',
     
     // Farm Management
     'farm.addNew': 'Add New Farm',
@@ -172,6 +218,8 @@ export const translations: Translations = {
     'nav.logout': 'लॉगआउट',
     'nav.login': 'लॉगिन',
     'nav.signup': 'साइन अप',
+    'nav.settings': 'सेटिंग्स',
+    'nav.admin': 'व्यवस्थापक पैनल',
     
     // Common (Hindi)
     'common.welcome': 'स्वागत',
@@ -200,6 +248,50 @@ export const translations: Translations = {
     'dashboard.recentActivity': 'हाल की गतिविधि',
     'dashboard.weatherUpdate': 'मौसम अपडेट',
     'dashboard.cropRecommendations': 'फसल सिफारिशें',
+    'dashboard.welcomeBack': 'वापसी पर स्वागत',
+    'dashboard.lastUpdated': 'अंतिम अपडेट',
+    'dashboard.activeFields': 'सक्रिय खेत',
+    'dashboard.activeSensors': 'सक्रिय सेंसर',
+    'dashboard.currentCrops': 'वर्तमान फसलें',
+    'dashboard.realtimeMonitoring': 'रीयल-टाइम निगरानी',
+    'dashboard.alertsActions': 'अलर्ट और त्वरित कार्य',
+    'dashboard.quickActions': 'त्वरित कार्य',
+    'dashboard.cropManagement': 'फसल प्रबंधन',
+    'dashboard.currentCropsOverview': 'वर्तमान फसल अवलोकन',
+    'dashboard.growthProgress': 'विकास प्रगति',
+    'dashboard.estHarvest': 'अनुमानित फसल',
+    'dashboard.farmSize': 'खेत का आकार',
+    'dashboard.hectares': 'हेक्टेयर',
+    'dashboard.thisMonth': 'इस महीने',
+    'dashboard.fieldsHarvesting': 'खेत कटाई में',
+    'dashboard.sensorsOffline': 'सेंसर ऑफलाइन',
+    'dashboard.peakGrowingSeason': 'मुख्य बढ़ने का मौसम',
+    'dashboard.currentConditions': 'वर्तमान स्थिति और 5-दिन का पूर्वानुमान',
+    'dashboard.fiveDayForecast': '5-दिन का पूर्वानुमान',
+    'dashboard.liveSensorData': 'लाइव सेंसर डेटा',
+    'dashboard.latestIoTReadings': 'नवीनतम IoT सेंसर रीडिंग',
+    'dashboard.recentAlerts': 'हाल के अलर्ट',
+    'dashboard.importantNotifications': 'आपके खेत से महत्वपूर्ण सूचनाएं',
+    'dashboard.commonTasks': 'सामान्य कार्य और सुविधाएं',
+    'dashboard.viewAllSensors': 'सभी सेंसर देखें',
+    'dashboard.viewAllAlerts': 'सभी अलर्ट देखें',
+    'dashboard.field': 'खेत',
+    
+    // Sensor data (Hindi)
+    'dashboard.sensors.soilMoisture': 'मिट्टी की नमी',
+    'dashboard.sensors.temperature': 'तापमान',
+    'dashboard.sensors.phLevel': 'pH स्तर',
+    'dashboard.sensors.nitrogen': 'नाइट्रोजन',
+    
+    // Status (Hindi)
+    'dashboard.status.low': 'कम',
+    'dashboard.status.high': 'ज्यादा',
+    'dashboard.status.normal': 'सामान्य',
+    
+    // Alerts (Hindi)
+    'dashboard.alerts.soilMoistureLow': 'खेत A में मिट्टी की नमी कम',
+    'dashboard.alerts.weatherAlert': 'मौसम चेतावनी: भारी बारिश की संभावना',
+    'dashboard.alerts.irrigationComplete': 'खेत B में सिंचाई पूर्ण',
     
     // Farm Management (Hindi)
     'farm.addNew': 'नया खेत जोड़ें',

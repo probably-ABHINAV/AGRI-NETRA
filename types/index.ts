@@ -218,3 +218,165 @@ export interface StateAgricultureInfo {
   traditionalPractices: string[]
   governmentSchemes: string[]
 }
+
+// Supabase Database Types
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          full_name: string
+          phone?: string
+          role: 'farmer' | 'expert' | 'admin'
+          location?: string
+          farm_size?: number
+          experience_years?: number
+          preferred_language: string
+          avatar_url?: string
+          is_verified: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          email: string
+          full_name: string
+          phone?: string
+          role: 'farmer' | 'expert' | 'admin'
+          location?: string
+          farm_size?: number
+          experience_years?: number
+          preferred_language?: string
+          avatar_url?: string
+          is_verified?: boolean
+        }
+        Update: {
+          email?: string
+          full_name?: string
+          phone?: string
+          role?: 'farmer' | 'expert' | 'admin'
+          location?: string
+          farm_size?: number
+          experience_years?: number
+          preferred_language?: string
+          avatar_url?: string
+          is_verified?: boolean
+        }
+      }
+      farms: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          location: string
+          coordinates?: any
+          area_hectares: number
+          soil_type?: string
+          irrigation_type?: string
+          region_id?: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          name: string
+          location: string
+          coordinates?: any
+          area_hectares: number
+          soil_type?: string
+          irrigation_type?: string
+          region_id?: string
+        }
+        Update: {
+          name?: string
+          location?: string
+          coordinates?: any
+          area_hectares?: number
+          soil_type?: string
+          irrigation_type?: string
+          region_id?: string
+        }
+      }
+      crops: {
+        Row: {
+          id: string
+          name: string
+          scientific_name?: string
+          category: 'cereals' | 'pulses' | 'oilseeds' | 'vegetables' | 'fruits' | 'spices' | 'cash_crops'
+          growing_season?: string
+          water_requirement?: string
+          soil_ph_min?: number
+          soil_ph_max?: number
+          temperature_min?: number
+          temperature_max?: number
+          growth_duration_days?: number
+          description?: string
+          image_url?: string
+          created_at: string
+        }
+        Insert: {
+          name: string
+          scientific_name?: string
+          category: 'cereals' | 'pulses' | 'oilseeds' | 'vegetables' | 'fruits' | 'spices' | 'cash_crops'
+          growing_season?: string
+          water_requirement?: string
+          soil_ph_min?: number
+          soil_ph_max?: number
+          temperature_min?: number
+          temperature_max?: number
+          growth_duration_days?: number
+          description?: string
+          image_url?: string
+        }
+        Update: {
+          name?: string
+          scientific_name?: string
+          category?: 'cereals' | 'pulses' | 'oilseeds' | 'vegetables' | 'fruits' | 'spices' | 'cash_crops'
+          growing_season?: string
+          water_requirement?: string
+          soil_ph_min?: number
+          soil_ph_max?: number
+          temperature_min?: number
+          temperature_max?: number
+          growth_duration_days?: number
+          description?: string
+          image_url?: string
+        }
+      }
+      sensor_readings: {
+        Row: {
+          id: string
+          sensor_id: string
+          value: number
+          unit: string
+          timestamp: string
+          quality_score?: number
+        }
+        Insert: {
+          sensor_id: string
+          value: number
+          unit: string
+          timestamp?: string
+          quality_score?: number
+        }
+        Update: {
+          sensor_id?: string
+          value?: number
+          unit?: string
+          timestamp?: string
+          quality_score?: number
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+  }
+}

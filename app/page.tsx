@@ -73,6 +73,7 @@ export default function HomePage() {
             </Link>
           </nav>
           <div className="flex items-center gap-3">
+            <LanguageSelector compact={true} />
             <Button
               variant="ghost"
               className="hover:bg-primary/10 hover:text-primary transition-all duration-300"

@@ -1,6 +1,7 @@
 // Database operations with Supabase integration
 import { supabase, isSupabaseConfigured } from './supabase'
 import type { Profile, Farm, Crop } from './supabase'
+import type { Database } from '@/types'
 
 export interface User {
   id: string

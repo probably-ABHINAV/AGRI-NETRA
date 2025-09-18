@@ -36,42 +36,56 @@ export default function LanguageSelector({ showStateSelector = true, compact = f
   const [loading, setLoading] = useState(false) // Added loading state
 
   const handleStateChange = (newState: string) => {
+    setLoading(true)
     setTempState(newState)
     setUserStateLocation(newState)
+    setTimeout(() => setLoading(false), 500) // Add small delay for smooth transition
   }
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 w-full">
         {showStateSelector && (
-          <Select value={userState} onValueChange={handleStateChange}>
-            <SelectTrigger className="w-32">
-              <MapPin className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="State" />
+          <Select value={userState} onValueChange={handleStateChange} disabled={loading}>
+            <SelectTrigger className="w-full h-9 text-sm border-gray-300 hover:border-green-400 bg-white shadow-sm">
+              <MapPin className="w-3 h-3 mr-1" />
+              <SelectValue placeholder={t('common.selectState') || 'Select State'} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50 max-h-60 overflow-y-auto">
               {states.map((state) => (
                 <SelectItem key={state.code} value={state.code}>
-                  {state.name}
+                  <div className="flex flex-col">
+                    <span>{state.name}</span>
+                    <span className="text-xs text-gray-500">{state.nativeName}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         )}
 
-        <Select value={language} onValueChange={setLanguage}>
-          <SelectTrigger className="w-36">
-            <Globe className="w-4 h-4 mr-2" />
-            <SelectValue />
+        <Select value={language} onValueChange={setLanguage} disabled={loading}>
+          <SelectTrigger className="w-full h-9 text-sm border-gray-300 hover:border-green-400 bg-white shadow-sm">
+            <Globe className="w-3 h-3 mr-1" />
+            <SelectValue placeholder={t('common.selectLanguage') || 'Language'} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-50 max-h-60 overflow-y-auto">
             {availableLanguages.map((lang) => (
               <SelectItem key={lang.code} value={lang.code}>
-                {lang.nativeName}
+                <div className="flex justify-between items-center w-full">
+                  <span>{lang.name}</span>
+                  <span className="text-sm font-medium ml-2">{lang.nativeName}</span>
+                </div>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        
+        {loading && (
+          <div className="text-xs text-gray-500 text-center">
+            {t('common.loading') || 'Loading...'}
+          </div>
+        )}
       </div>
     )
   }

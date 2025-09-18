@@ -14,7 +14,7 @@ const nextConfig = {
     allowedRevalidateHeaderKeys: [],
   },
   // Allow Replit origins for development
-  allowedDevOrigins: ['*.repl.co'],
+  allowedDevOrigins: ['*.repl.co', '*.replit.dev', '127.0.0.1'],
   // Configure for Replit environment
   async rewrites() {
     return [];

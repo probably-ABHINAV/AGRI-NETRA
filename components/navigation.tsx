@@ -22,7 +22,7 @@ import {
   LogOut,
   Shield
 } from 'lucide-react'
-import { LanguageSelector } from '@/components/language-selector'
+import LanguageSelector from '@/components/language-selector'
 import { useLanguage } from '@/hooks/use-language'
 import { logoutAction } from '@/app/actions/auth'
 
@@ -32,13 +32,13 @@ function Navigation() {
   const { t } = useLanguage()
 
   const navigationItems = [
-    { name: "Dashboard", href: "/dashboard", icon: Home, adminOnly: false },
-    { name: "Crop Recommendations", href: "/crop-recommendations", icon: Brain, adminOnly: false },
-    { name: "Pest Detection", href: "/pest-detection", icon: Bug, adminOnly: false },
-    { name: "IoT Sensors", href: "/sensors", icon: Zap, adminOnly: false },
-    { name: "Analytics", href: "/analytics", icon: BarChart3, adminOnly: false },
-    { name: "Expert Chat", href: "/chat", icon: MessageSquare, badge: 3, adminOnly: false },
-    { name: "Admin Panel", href: "/admin", icon: Shield, adminOnly: true },
+    { name: t('nav.dashboard') || 'Dashboard', href: "/dashboard", icon: Home, adminOnly: false },
+    { name: t('nav.recommendations') || 'Crop Advice', href: "/crop-recommendations", icon: Brain, adminOnly: false },
+    { name: t('nav.pest-detection') || 'Pest Detection', href: "/pest-detection", icon: Bug, adminOnly: false },
+    { name: t('nav.sensors') || 'IoT Sensors', href: "/sensors", icon: Zap, adminOnly: false },
+    { name: t('nav.analytics') || 'Analytics', href: "/analytics", icon: BarChart3, adminOnly: false },
+    { name: t('nav.chat') || 'Expert Chat', href: "/chat", icon: MessageSquare, badge: 3, adminOnly: false },
+    { name: t('nav.admin') || 'Admin Panel', href: "/admin", icon: Shield, adminOnly: true },
   ]
 
   // Filter navigation items based on user role (or adminOnly flag)
@@ -84,6 +84,11 @@ function Navigation() {
         </nav>
 
         <div className="p-4 border-t border-gray-200">
+          {/* Language Selector */}
+          <div className="mb-4">
+            <LanguageSelector compact={true} showStateSelector={true} />
+          </div>
+          
           <div className="flex items-center gap-3 px-3 py-2">
             <Avatar className="h-8 w-8">
               <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
@@ -98,7 +103,7 @@ function Navigation() {
           <div className="mt-3 space-y-1">
             <Button variant="ghost" size="sm" className="w-full justify-start">
               <Settings className="h-4 w-4 mr-2" />
-              Settings
+              {t('nav.settings') || 'Settings'}
             </Button>
             <Button
               variant="ghost"
@@ -109,7 +114,7 @@ function Navigation() {
               }}
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+              {t('nav.logout')}
             </Button>
           </div>
         </div>
@@ -151,6 +156,11 @@ function Navigation() {
             })}
           </nav>
           <div className="p-4 border-t border-gray-200">
+            {/* Mobile Language Selector */}
+            <div className="mb-4">
+              <LanguageSelector compact={true} showStateSelector={true} />
+            </div>
+            
             <div className="flex items-center gap-3 px-3 py-2">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
@@ -164,7 +174,7 @@ function Navigation() {
             <div className="mt-3 space-y-1">
               <Button variant="ghost" size="sm" className="w-full justify-start">
                 <Settings className="h-4 w-4 mr-2" />
-                Settings
+                {t('nav.settings') || 'Settings'}
               </Button>
               <Button
                 variant="ghost"
@@ -175,7 +185,7 @@ function Navigation() {
                 }}
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                {t('nav.logout')}
               </Button>
             </div>
           </div>
