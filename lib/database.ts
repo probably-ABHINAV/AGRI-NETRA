@@ -52,7 +52,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .insert([{
@@ -66,13 +66,14 @@ export const db = {
         .single()
 
       if (error) throw error
+      // Ensure all required fields are present, even if null in Supabase
       return {
         id: data.id,
         email: data.email,
         full_name: data.full_name,
         role: data.role,
-        location: data.location,
-        phone: data.phone
+        location: data.location || null, // Handle potential null
+        phone: data.phone || null // Handle potential null
       }
     } catch (error) {
       console.error('Error creating user:', error)
@@ -96,7 +97,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -104,13 +105,15 @@ export const db = {
         .single()
 
       if (error) throw error
+      if (!data) return null // Handle case where user is not found
+
       return {
         id: data.id,
         email: data.email,
         full_name: data.full_name,
         role: data.role,
-        location: data.location,
-        phone: data.phone
+        location: data.location || null,
+        phone: data.phone || null
       }
     } catch (error) {
       console.error('Error fetching user:', error)
@@ -135,7 +138,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('farms')
         .insert([{
@@ -167,7 +170,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('farms')
         .select('*')
@@ -208,7 +211,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('crops')
         .select('*')
@@ -231,7 +234,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('crops')
         .select('*')
@@ -259,7 +262,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('regions')
         .select('*')
@@ -282,7 +285,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('farms')
         .select('*')
@@ -307,7 +310,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('farm_crops')
         .select('*')
@@ -335,7 +338,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('farm_crops')
         .insert([cropData])
@@ -360,7 +363,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('crop_recommendations')
         .select('*')
@@ -388,7 +391,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('crop_recommendations')
         .insert([recData])
@@ -413,7 +416,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('pest_alerts')
         .select('*')
@@ -441,7 +444,7 @@ export const db = {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-      
+
       const { data, error } = await supabase
         .from('pest_alerts')
         .insert([alertData])

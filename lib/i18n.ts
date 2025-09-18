@@ -1,4 +1,3 @@
-
 export interface StateLanguage {
   code: string
   name: string
@@ -10,59 +9,59 @@ export const stateLanguages: StateLanguage[] = [
   // Punjab
   { code: 'pa', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', state: 'punjab' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'punjab' },
-  
+
   // Haryana
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'haryana' },
   { code: 'hy', name: 'Haryanvi', nativeName: 'हरियाणवी', state: 'haryana' },
-  
+
   // Uttar Pradesh
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'uttar-pradesh' },
   { code: 'ur', name: 'Urdu', nativeName: 'اردو', state: 'uttar-pradesh' },
-  
+
   // Madhya Pradesh
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'madhya-pradesh' },
-  
+
   // Maharashtra
   { code: 'mr', name: 'Marathi', nativeName: 'मराठी', state: 'maharashtra' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'maharashtra' },
-  
+
   // Bihar
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'bihar' },
   { code: 'bh', name: 'Bhojpuri', nativeName: 'भोजपुरी', state: 'bihar' },
   { code: 'mg', name: 'Magahi', nativeName: 'मगही', state: 'bihar' },
-  
+
   // West Bengal
   { code: 'bn', name: 'Bengali', nativeName: 'বাংলা', state: 'west-bengal' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'west-bengal' },
-  
+
   // Andhra Pradesh
   { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', state: 'andhra-pradesh' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'andhra-pradesh' },
-  
+
   // Telangana
   { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', state: 'telangana' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'telangana' },
-  
+
   // Gujarat
   { code: 'gu', name: 'Gujarati', nativeName: 'ગુજરાતી', state: 'gujarat' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'gujarat' },
-  
+
   // Tamil Nadu
   { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', state: 'tamil-nadu' },
   { code: 'en', name: 'English', nativeName: 'English', state: 'tamil-nadu' },
-  
+
   // Kerala
   { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം', state: 'kerala' },
   { code: 'en', name: 'English', nativeName: 'English', state: 'kerala' },
-  
+
   // Karnataka
   { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ', state: 'karnataka' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'karnataka' },
-  
+
   // Rajasthan
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'rajasthan' },
   { code: 'rj', name: 'Rajasthani', nativeName: 'राजस्थानी', state: 'rajasthan' },
-  
+
   // Odisha
   { code: 'or', name: 'Odia', nativeName: 'ଓଡ଼ିଆ', state: 'odisha' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', state: 'odisha' },
@@ -76,7 +75,40 @@ export interface Translations {
   [languageCode: string]: Translation
 }
 
-export const translations: Translations = {
+// Indian states enum
+export enum IndianStates {
+  ANDHRA_PRADESH = 'andhra_pradesh',
+  ARUNACHAL_PRADESH = 'arunachal_pradesh',
+  ASSAM = 'assam',
+  BIHAR = 'bihar',
+  CHHATTISGARH = 'chhattisgarh',
+  GOA = 'goa',
+  GUJARAT = 'gujarat',
+  HARYANA = 'haryana',
+  HIMACHAL_PRADESH = 'himachal_pradesh',
+  JHARKHAND = 'jharkhand',
+  KARNATAKA = 'karnataka',
+  KERALA = 'kerala',
+  MADHYA_PRADESH = 'madhya_pradesh',
+  MAHARASHTRA = 'maharashtra',
+  MANIPUR = 'manipur',
+  MEGHALAYA = 'meghalaya',
+  MIZORAM = 'mizoram',
+  NAGALAND = 'nagaland',
+  ODISHA = 'odisha',
+  PUNJAB = 'punjab',
+  RAJASTHAN = 'rajasthan',
+  SIKKIM = 'sikkim',
+  TAMIL_NADU = 'tamil_nadu',
+  TELANGANA = 'telangana',
+  TRIPURA = 'tripura',
+  UTTAR_PRADESH = 'uttar_pradesh',
+  UTTARAKHAND = 'uttarakhand',
+  WEST_BENGAL = 'west_bengal',
+}
+
+// Support for multiple Indian languages
+const translations: Translations = {
   en: {
     // Navigation
     'nav.home': 'Home',
@@ -92,7 +124,7 @@ export const translations: Translations = {
     'nav.signup': 'Sign Up',
     'nav.settings': 'Settings',
     'nav.admin': 'Admin Panel',
-    
+
     // Common
     'common.welcome': 'Welcome',
     'common.loading': 'Loading...',
@@ -110,7 +142,7 @@ export const translations: Translations = {
     'common.selectLanguage': 'Select Language',
     'common.selectState': 'Select Your State',
     'common.selectYourState': 'Select your state for localized farming advice',
-    
+
     // Home page
     'home.title': 'AgriNetra - Smart Crop Advisory System',
     'home.subtitle': 'Transform your farming with AI-powered crop recommendations, real-time pest detection, and intelligent IoT sensors. Join the agricultural revolution today.',
@@ -119,7 +151,7 @@ export const translations: Translations = {
     'home.viewDemo': 'View Demo',
     'home.revolutionaryTech': 'Revolutionary Agricultural Technology',
     'home.smartCropAdvisory': 'Smart Crop Advisory',
-    
+
     // Dashboard
     'dashboard.title': 'Farmer Dashboard',
     'dashboard.overview': 'Farm Overview',
@@ -154,23 +186,23 @@ export const translations: Translations = {
     'dashboard.viewAllSensors': 'View All Sensors',
     'dashboard.viewAllAlerts': 'View All Alerts',
     'dashboard.field': 'Field',
-    
+
     // Sensor data
     'dashboard.sensors.soilMoisture': 'Soil Moisture',
     'dashboard.sensors.temperature': 'Temperature',
     'dashboard.sensors.phLevel': 'pH Level',
     'dashboard.sensors.nitrogen': 'Nitrogen',
-    
+
     // Status
     'dashboard.status.low': 'Low',
     'dashboard.status.high': 'High',
     'dashboard.status.normal': 'Normal',
-    
+
     // Alerts
     'dashboard.alerts.soilMoistureLow': 'Soil moisture low in Field A',
     'dashboard.alerts.weatherAlert': 'Weather alert: Heavy rain expected',
     'dashboard.alerts.irrigationComplete': 'Irrigation completed in Field B',
-    
+
     // Farm Management
     'farm.addNew': 'Add New Farm',
     'farm.name': 'Farm Name',
@@ -179,14 +211,14 @@ export const translations: Translations = {
     'farm.soilType': 'Soil Type',
     'farm.irrigationType': 'Irrigation Type',
     'farm.create': 'Create Farm',
-    
+
     // Crop Recommendations
     'crops.title': 'Crop Recommendations',
     'crops.seasonal': 'Seasonal Recommendations',
     'crops.kharif': 'Kharif Season',
     'crops.rabi': 'Rabi Season',
     'crops.zaid': 'Zaid Season',
-    
+
     // States and Agriculture
     'state.punjab': 'Punjab - Granary of India',
     'state.haryana': 'Haryana - Green Revolution Belt',
@@ -204,7 +236,7 @@ export const translations: Translations = {
     'state.rajasthan': 'Rajasthan - Millet State',
     'state.odisha': 'Odisha - Rice & Fisheries',
   },
-  
+
   hi: {
     // Navigation (Hindi)
     'nav.home': 'होम',
@@ -220,7 +252,7 @@ export const translations: Translations = {
     'nav.signup': 'साइन अप',
     'nav.settings': 'सेटिंग्स',
     'nav.admin': 'व्यवस्थापक पैनल',
-    
+
     // Common (Hindi)
     'common.welcome': 'स्वागत',
     'common.loading': 'लोड हो रहा है...',
@@ -235,13 +267,13 @@ export const translations: Translations = {
     'common.add': 'जोड़ें',
     'common.next': 'अगला',
     'common.previous': 'पिछला',
-    
+
     // Home page (Hindi)
     'home.title': 'एग्रीनेत्रा - स्मार्ट फसल सलाहकार प्रणाली',
     'home.subtitle': 'AI-संचालित अंतर्दृष्टि के साथ अपनी खेती को बदलें',
     'home.getStarted': 'शुरू करें',
     'home.learnMore': 'और जानें',
-    
+
     // Dashboard (Hindi)
     'dashboard.title': 'किसान डैशबोर्ड',
     'dashboard.overview': 'खेत अवलोकन',
@@ -276,23 +308,23 @@ export const translations: Translations = {
     'dashboard.viewAllSensors': 'सभी सेंसर देखें',
     'dashboard.viewAllAlerts': 'सभी अलर्ट देखें',
     'dashboard.field': 'खेत',
-    
+
     // Sensor data (Hindi)
     'dashboard.sensors.soilMoisture': 'मिट्टी की नमी',
     'dashboard.sensors.temperature': 'तापमान',
     'dashboard.sensors.phLevel': 'pH स्तर',
     'dashboard.sensors.nitrogen': 'नाइट्रोजन',
-    
+
     // Status (Hindi)
     'dashboard.status.low': 'कम',
     'dashboard.status.high': 'ज्यादा',
     'dashboard.status.normal': 'सामान्य',
-    
+
     // Alerts (Hindi)
     'dashboard.alerts.soilMoistureLow': 'खेत A में मिट्टी की नमी कम',
     'dashboard.alerts.weatherAlert': 'मौसम चेतावनी: भारी बारिश की संभावना',
     'dashboard.alerts.irrigationComplete': 'खेत B में सिंचाई पूर्ण',
-    
+
     // Farm Management (Hindi)
     'farm.addNew': 'नया खेत जोड़ें',
     'farm.name': 'खेत का नाम',
@@ -301,7 +333,7 @@ export const translations: Translations = {
     'farm.soilType': 'मिट्टी का प्रकार',
     'farm.irrigationType': 'सिंचाई का प्रकार',
     'farm.create': 'खेत बनाएं',
-    
+
     // States (Hindi)
     'state.punjab': 'पंजाब - भारत का अन्न भंडार',
     'state.haryana': 'हरियाणा - हरित क्रांति क्षेत्र',
@@ -317,7 +349,7 @@ export const translations: Translations = {
     'state.rajasthan': 'राजस्थान - बाजरा राज्य',
     'state.odisha': 'ओडिशा - चावल और मत्स्य पालन',
   },
-  
+
   // Add more languages for each state...
   pa: {
     // Punjabi translations
@@ -327,7 +359,7 @@ export const translations: Translations = {
     'home.title': 'ਅਗਰੀਨੇਤਰਾ - ਸਮਾਰਟ ਫਸਲ ਸਲਾਹਕਾਰ ਸਿਸਟਮ',
     'state.punjab': 'ਪੰਜਾਬ - ਭਾਰਤ ਦਾ ਅਨਾਜ ਭੰਡਾਰ',
   },
-  
+
   mr: {
     // Marathi translations
     'nav.home': 'मुख्यपृष्ठ',
@@ -336,16 +368,16 @@ export const translations: Translations = {
     'home.title': 'अग्रीनेत्रा - स्मार्ट पीक सल्लागार प्रणाली',
     'state.maharashtra': 'महाराष्ट्र - कापूस नेता',
   },
-  
+
   bn: {
     // Bengali translations
     'nav.home': 'হোম',
     'nav.dashboard': 'ড্যাশবোর্ড',
     'nav.farms': 'আমার খামার',
     'home.title': 'এগ্রিনেত্রা - স্মার্ট ফসল পরামর্শ সিস্টেম',
-    'state.west-bengal': 'পশ্চিমবঙ্গ - চাল ও পাট কেন্দ্র',
+    'state.west-bengal': 'পশ্চিমবঙ্গ - চাল ওপাট কেন্দ্র',
   },
-  
+
   te: {
     // Telugu translations
     'nav.home': 'హోమ్',
@@ -355,7 +387,7 @@ export const translations: Translations = {
     'state.andhra-pradesh': 'ఆంధ్రప్రదేశ్ - వరి మరియు మసాలా',
     'state.telangana': 'తెలంగాణ - IT మరియు వ్యవసాయం',
   },
-  
+
   gu: {
     // Gujarati translations
     'nav.home': 'ઘર',
@@ -364,7 +396,7 @@ export const translations: Translations = {
     'home.title': 'અગ્રિનેત્રા - સ્માર્ટ પાક સલાહકાર સિસ્ટમ',
     'state.gujarat': 'ગુજરાત - કપાસ અને ડેરી',
   },
-  
+
   ta: {
     // Tamil translations
     'nav.home': 'முகப்பு',
@@ -373,7 +405,7 @@ export const translations: Translations = {
     'home.title': 'அக்ரிநேத்ரா - ஸ்மார்ட் பயிர் ஆலோசனை அமைப்பு',
     'state.tamil-nadu': 'தமிழ்நாடு - அரிசி மற்றும் தோட்டக்கலை',
   },
-  
+
   ml: {
     // Malayalam translations
     'nav.home': 'ഹോം',
@@ -382,7 +414,7 @@ export const translations: Translations = {
     'home.title': 'അഗ്രിനേത്രാ - സ്മാർട്ട് വിള ഉപദേശ സംവിധാനം',
     'state.kerala': 'കേരളം - മസാല തോട്ടം',
   },
-  
+
   kn: {
     // Kannada translations
     'nav.home': 'ಮುಖ್ಯಪುಟ',
@@ -391,7 +423,7 @@ export const translations: Translations = {
     'home.title': 'ಅಗ್ರಿನೇತ್ರಾ - ಸ್ಮಾರ್ಟ್ ಬೆಳೆ ಸಲಹಾ ವ್ಯವಸ್ಥೆ',
     'state.karnataka': 'ಕರ್ನಾಟಕ - ಕಾಫಿ ಭೂಮಿ',
   },
-  
+
   or: {
     // Odia translations
     'nav.home': 'ଘର',

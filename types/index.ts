@@ -7,24 +7,40 @@ export interface User {
   role: 'farmer' | 'expert' | 'admin'
   createdAt: string
   updatedAt: string
+  profile?: UserProfile
 }
 
-export interface AuthState {
-  user: User | null
-  isAuthenticated: boolean
-  loading: boolean
+export interface UserProfile {
+  id: string
+  userId: string
+  firstName: string
+  lastName: string
+  phone?: string
+  location?: string
+  state?: string
+  language?: string
+  avatar?: string
+  bio?: string
+  expertise?: string[]
+  createdAt: string
+  updatedAt: string
 }
 
-// Farm and Crop Types
+// Farm and Agricultural Types
 export interface Farm {
   id: string
   name: string
   location: string
   size: number
   soilType: string
+  climateZone: string
   userId: string
+  coordinates?: {
+    latitude: number
+    longitude: number
+  }
   createdAt: string
-  crops: Crop[]
+  updatedAt: string
 }
 
 export interface Crop {
@@ -32,351 +48,416 @@ export interface Crop {
   name: string
   variety: string
   plantedDate: string
-  expectedHarvest: string
+  expectedHarvestDate?: string
+  actualHarvestDate?: string
   area: number
-  farmId: string
   status: 'planted' | 'growing' | 'ready' | 'harvested'
-  healthScore: number
+  farmId: string
+  userId: string
+  recommendations?: Recommendation[]
+  createdAt: string
+  updatedAt: string
 }
 
-// IoT and Sensor Types
+// Sensor and IoT Types
 export interface SensorReading {
   id: string
-  deviceId: string
+  sensorId: string
   timestamp: string
-  temperature: number
-  humidity: number
-  soilMoisture: number
-  ph: number
-  nitrogen: number
-  phosphorus: number
-  potassium: number
+  soilMoisture?: number
+  soilTemperature?: number
+  airTemperature?: number
+  humidity?: number
+  ph?: number
+  nitrogen?: number
+  phosphorus?: number
+  potassium?: number
+  lightIntensity?: number
+  rainfall?: number
+  windSpeed?: number
+  windDirection?: number
+  farmId: string
+  createdAt: string
 }
 
-export interface IoTDevice {
+export interface Sensor {
   id: string
   name: string
-  type: 'soil_moisture' | 'weather_station' | 'ph_sensor' | 'nutrient_sensor'
-  status: 'online' | 'offline' | 'warning'
-  batteryLevel: number
-  lastReading: string
+  type: 'soil' | 'weather' | 'camera' | 'multisensor'
+  location: string
+  status: 'active' | 'inactive' | 'maintenance'
+  batteryLevel?: number
+  lastReading?: string
   farmId: string
-  location: {
+  coordinates?: {
     latitude: number
     longitude: number
-    description: string
   }
-  calibrationDate: Date
+  createdAt: string
+  updatedAt: string
 }
 
-// AI Service Types
-export interface CropRecommendation {
-  cropName: string
-  variety: string
-  confidence: number
-  expectedYield: number
-  profitability: number
-  riskFactors: string[]
-  plantingWindow: {
-    start: string
-    end: string
-  }
-  requirements: {
-    soilType: string
-    waterRequirement: string
-    temperature: string
-  }
+// AI and Recommendations
+export interface Recommendation {
+  id: string
+  type: 'crop' | 'irrigation' | 'fertilizer' | 'pest' | 'disease' | 'harvest'
+  title: string
+  description: string
+  priority: 'low' | 'medium' | 'high' | 'critical'
+  status: 'pending' | 'implemented' | 'ignored'
+  aiConfidence: number
+  data?: Record<string, any>
+  cropId?: string
+  farmId: string
+  userId: string
+  implementedAt?: string
+  createdAt: string
+  updatedAt: string
 }
 
-export interface PestDetection {
-  pestName: string
-  confidence: number
+// Pest and Disease Detection
+export interface PestAlert {
+  id: string
+  name: string
+  type: 'pest' | 'disease' | 'nutrient_deficiency'
   severity: 'low' | 'medium' | 'high' | 'critical'
-  affectedArea: number
   description: string
   symptoms: string[]
-  treatments: PestTreatment[]
-  imageAnalysis: {
-    boundingBoxes: Array<{
-      x: number
-      y: number
-      width: number
-      height: number
-    }>
-    confidence: number
-  }
+  treatment: string[]
+  prevention: string[]
+  images?: string[]
+  detectedAt: string
+  location?: string
+  farmId: string
+  cropId?: string
+  userId: string
+  status: 'detected' | 'treating' | 'resolved'
+  aiConfidence: number
+  createdAt: string
+  updatedAt: string
 }
 
-export interface PestTreatment {
-  name: string
-  type: 'organic' | 'chemical' | 'biological'
-  effectiveness: number
-  cost: string
-  duration: string
-  applicationMethod: string
-  precautions: string[]
-}
-
-// Language and Localization Types
-export interface LanguageConfig {
-  code: string
-  name: string
-  localName: string
-  flag: string
-  rtl?: boolean
-}
-
-export interface TranslationSet {
-  [key: string]: string | TranslationSet
-}
-
-// API Response Types
-export interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  error?: string
-  message?: string
-}
-
-export interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-  page: number
-  limit: number
-  hasNext: boolean
-  hasPrev: boolean
-}
-
-// Weather Types
+// Weather and Environmental
 export interface WeatherData {
+  timestamp: string
   temperature: number
   humidity: number
-  pressure: number
+  rainfall: number
   windSpeed: number
   windDirection: number
-  rainfall: number
-  uvIndex: number
-  cloudCover: number
-  timestamp: string
+  pressure?: number
+  uvIndex?: number
+  visibility?: number
+  cloudCover?: number
   location: string
+  source: 'sensor' | 'api' | 'forecast'
 }
 
 export interface WeatherForecast {
   date: string
-  temperature: {
-    min: number
-    max: number
-  }
+  minTemp: number
+  maxTemp: number
   humidity: number
   rainfall: number
-  conditions: string
-  iconCode: string
+  windSpeed: number
+  description: string
+  icon?: string
+  location: string
 }
 
-// Market and Analytics Types
+// Market and Analytics
 export interface MarketPrice {
-  cropName: string
-  variety: string
+  id: string
+  crop: string
+  variety?: string
   price: number
-  unit: string
+  unit: 'kg' | 'quintal' | 'ton'
   market: string
+  location: string
   date: string
-  trend: 'up' | 'down' | 'stable'
-  changePercent: number
+  source: string
+  createdAt: string
 }
 
+export interface YieldData {
+  cropId: string
+  farmId: string
+  actualYield: number
+  predictedYield?: number
+  quality: 'poor' | 'fair' | 'good' | 'excellent'
+  harvestDate: string
+  marketPrice?: number
+  revenue?: number
+  costs?: number
+  profit?: number
+  createdAt: string
+}
+
+// Expert and Chat
+export interface ExpertConsultation {
+  id: string
+  userId: string
+  expertId: string
+  title: string
+  description: string
+  category: 'crop' | 'pest' | 'soil' | 'irrigation' | 'harvest' | 'market' | 'general'
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+  scheduledAt?: string
+  completedAt?: string
+  rating?: number
+  feedback?: string
+  attachments?: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ChatMessage {
+  id: string
+  consultationId?: string
+  senderId: string
+  recipientId: string
+  message: string
+  type: 'text' | 'image' | 'file' | 'location' | 'recommendation'
+  attachments?: string[]
+  metadata?: Record<string, any>
+  readAt?: string
+  createdAt: string
+}
+
+// Irrigation and Automation
+export interface IrrigationSchedule {
+  id: string
+  farmId: string
+  cropId?: string
+  name: string
+  type: 'manual' | 'scheduled' | 'sensor_based' | 'ai_optimized'
+  schedule?: {
+    startTime: string
+    duration: number
+    frequency: 'daily' | 'weekly' | 'monthly' | 'custom'
+    days?: string[]
+  }
+  conditions?: {
+    soilMoisture?: { min: number; max: number }
+    weather?: string[]
+    temperature?: { min: number; max: number }
+  }
+  status: 'active' | 'paused' | 'completed'
+  lastRun?: string
+  nextRun?: string
+  createdAt: string
+  updatedAt: string
+}
+
+// Analytics and Reports
 export interface AnalyticsData {
-  farmPerformance: {
-    totalYield: number
-    avgYieldPerAcre: number
+  farmId: string
+  userId: string
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  startDate: string
+  endDate: string
+  metrics: {
+    totalYield?: number
+    averageYield?: number
+    totalRevenue?: number
+    totalCosts?: number
+    profit?: number
+    waterUsage?: number
+    energyUsage?: number
+    pestIncidents?: number
+    diseaseIncidents?: number
+    expertConsultations?: number
+    recommendationsImplemented?: number
+  }
+  crops?: Record<string, any>
+  trends?: Record<string, any>
+  benchmarks?: Record<string, any>
+  createdAt: string
+}
+
+// Language and Localization
+export interface LanguageOption {
+  code: string
+  name: string
+  nativeName: string
+  flag: string
+  regions: string[]
+}
+
+export enum IndianStates {
+  ANDHRA_PRADESH = 'andhra_pradesh',
+  ARUNACHAL_PRADESH = 'arunachal_pradesh',
+  ASSAM = 'assam',
+  BIHAR = 'bihar',
+  CHHATTISGARH = 'chhattisgarh',
+  GOA = 'goa',
+  GUJARAT = 'gujarat',
+  HARYANA = 'haryana',
+  HIMACHAL_PRADESH = 'himachal_pradesh',
+  JHARKHAND = 'jharkhand',
+  KARNATAKA = 'karnataka',
+  KERALA = 'kerala',
+  MADHYA_PRADESH = 'madhya_pradesh',
+  MAHARASHTRA = 'maharashtra',
+  MANIPUR = 'manipur',
+  MEGHALAYA = 'meghalaya',
+  MIZORAM = 'mizoram',
+  NAGALAND = 'nagaland',
+  ODISHA = 'odisha',
+  PUNJAB = 'punjab',
+  RAJASTHAN = 'rajasthan',
+  SIKKIM = 'sikkim',
+  TAMIL_NADU = 'tamil_nadu',
+  TELANGANA = 'telangana',
+  TRIPURA = 'tripura',
+  UTTAR_PRADESH = 'uttar_pradesh',
+  UTTARAKHAND = 'uttarakhand',
+  WEST_BENGAL = 'west_bengal',
+}
+
+// API Response Types
+export interface ApiResponse<T = any> {
+  success: boolean
+  data?: T
+  error?: string
+  message?: string
+  timestamp: string
+}
+
+export interface PaginatedResponse<T = any> {
+  data: T[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
+}
+
+// Real-time and WebSocket Types
+export interface RealtimeUpdate {
+  type: 'sensor_reading' | 'pest_alert' | 'weather_alert' | 'irrigation_alert' | 'recommendation'
+  data: any
+  timestamp: string
+  farmId?: string
+  userId?: string
+}
+
+// AI Service Types
+export interface AIAnalysisResult {
+  confidence: number
+  results: any
+  recommendations?: string[]
+  metadata?: Record<string, any>
+  processedAt: string
+}
+
+export interface CropRecommendation extends AIAnalysisResult {
+  crops: Array<{
+    name: string
+    variety: string
+    suitability: number
+    expectedYield: number
     profitability: number
-    efficiency: number
-  }
-  cropHealth: {
-    overallScore: number
-    healthyPercentage: number
-    atRiskPercentage: number
-    diseaseIncidence: number
-  }
-  resourceUsage: {
-    waterConsumption: number
-    fertilizerUsage: number
-    pesticideUsage: number
-    energyConsumption: number
+    riskFactors: string[]
+    seasonality: {
+      plantingWindow: string
+      harvestWindow: string
+      duration: number
+    }
+  }>
+}
+
+export interface PestDetectionResult extends AIAnalysisResult {
+  detections: Array<{
+    name: string
+    type: 'pest' | 'disease' | 'nutrient_deficiency'
+    severity: number
+    location?: {
+      x: number
+      y: number
+      width: number
+      height: number
+    }
+    treatment: string[]
+    prevention: string[]
+  }>
+}
+
+// Form and UI Types
+export interface FormField {
+  name: string
+  label: string
+  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea' | 'file' | 'date' | 'checkbox'
+  required?: boolean
+  placeholder?: string
+  options?: Array<{ value: string; label: string }>
+  validation?: {
+    min?: number
+    max?: number
+    pattern?: string
+    message?: string
   }
 }
 
-// State Agriculture Information
-export interface StateAgricultureInfo {
-  state: string
-  majorCrops: string[]
-  soilTypes: string[]
-  climate: string
-  language: string
-  regionalLanguages: string[]
-  agriculturalZones: string[]
-  traditionalPractices: string[]
-  governmentSchemes: string[]
+export interface TableColumn {
+  key: string
+  title: string
+  sortable?: boolean
+  filterable?: boolean
+  render?: (value: any, record: any) => React.ReactNode
 }
 
-// Supabase Database Types
+// Notification Types
+export interface Notification {
+  id: string
+  userId: string
+  title: string
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
+  category: 'system' | 'crop' | 'weather' | 'pest' | 'irrigation' | 'market' | 'expert'
+  read: boolean
+  actionUrl?: string
+  data?: Record<string, any>
+  createdAt: string
+  readAt?: string
+}
+
+// Database Schema Types
 export interface Database {
   public: {
     Tables: {
       profiles: {
-        Row: {
-          id: string
-          email: string
-          full_name: string
-          phone?: string
-          role: 'farmer' | 'expert' | 'admin'
-          location?: string
-          farm_size?: number
-          experience_years?: number
-          preferred_language: string
-          avatar_url?: string
-          is_verified: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          email: string
-          full_name: string
-          phone?: string
-          role: 'farmer' | 'expert' | 'admin'
-          location?: string
-          farm_size?: number
-          experience_years?: number
-          preferred_language?: string
-          avatar_url?: string
-          is_verified?: boolean
-        }
-        Update: {
-          email?: string
-          full_name?: string
-          phone?: string
-          role?: 'farmer' | 'expert' | 'admin'
-          location?: string
-          farm_size?: number
-          experience_years?: number
-          preferred_language?: string
-          avatar_url?: string
-          is_verified?: boolean
-        }
+        Row: UserProfile
+        Insert: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>
+        Update: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>
       }
       farms: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          location: string
-          coordinates?: any
-          area_hectares: number
-          soil_type?: string
-          irrigation_type?: string
-          region_id?: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          user_id: string
-          name: string
-          location: string
-          coordinates?: any
-          area_hectares: number
-          soil_type?: string
-          irrigation_type?: string
-          region_id?: string
-        }
-        Update: {
-          name?: string
-          location?: string
-          coordinates?: any
-          area_hectares?: number
-          soil_type?: string
-          irrigation_type?: string
-          region_id?: string
-        }
+        Row: Farm
+        Insert: Omit<Farm, 'id' | 'createdAt' | 'updatedAt'>
+        Update: Partial<Omit<Farm, 'id' | 'createdAt' | 'updatedAt'>>
       }
       crops: {
-        Row: {
-          id: string
-          name: string
-          scientific_name?: string
-          category: 'cereals' | 'pulses' | 'oilseeds' | 'vegetables' | 'fruits' | 'spices' | 'cash_crops'
-          growing_season?: string
-          water_requirement?: string
-          soil_ph_min?: number
-          soil_ph_max?: number
-          temperature_min?: number
-          temperature_max?: number
-          growth_duration_days?: number
-          description?: string
-          image_url?: string
-          created_at: string
-        }
-        Insert: {
-          name: string
-          scientific_name?: string
-          category: 'cereals' | 'pulses' | 'oilseeds' | 'vegetables' | 'fruits' | 'spices' | 'cash_crops'
-          growing_season?: string
-          water_requirement?: string
-          soil_ph_min?: number
-          soil_ph_max?: number
-          temperature_min?: number
-          temperature_max?: number
-          growth_duration_days?: number
-          description?: string
-          image_url?: string
-        }
-        Update: {
-          name?: string
-          scientific_name?: string
-          category?: 'cereals' | 'pulses' | 'oilseeds' | 'vegetables' | 'fruits' | 'spices' | 'cash_crops'
-          growing_season?: string
-          water_requirement?: string
-          soil_ph_min?: number
-          soil_ph_max?: number
-          temperature_min?: number
-          temperature_max?: number
-          growth_duration_days?: number
-          description?: string
-          image_url?: string
-        }
+        Row: Crop
+        Insert: Omit<Crop, 'id' | 'createdAt' | 'updatedAt'>
+        Update: Partial<Omit<Crop, 'id' | 'createdAt' | 'updatedAt'>>
       }
       sensor_readings: {
-        Row: {
-          id: string
-          sensor_id: string
-          value: number
-          unit: string
-          timestamp: string
-          quality_score?: number
-        }
-        Insert: {
-          sensor_id: string
-          value: number
-          unit: string
-          timestamp?: string
-          quality_score?: number
-        }
-        Update: {
-          sensor_id?: string
-          value?: number
-          unit?: string
-          timestamp?: string
-          quality_score?: number
-        }
+        Row: SensorReading
+        Insert: Omit<SensorReading, 'id' | 'createdAt'>
+        Update: Partial<Omit<SensorReading, 'id' | 'createdAt'>>
       }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
+      pest_alerts: {
+        Row: PestAlert
+        Insert: Omit<PestAlert, 'id' | 'createdAt' | 'updatedAt'>
+        Update: Partial<Omit<PestAlert, 'id' | 'createdAt' | 'updatedAt'>>
+      }
+      recommendations: {
+        Row: Recommendation
+        Insert: Omit<Recommendation, 'id' | 'createdAt' | 'updatedAt'>
+        Update: Partial<Omit<Recommendation, 'id' | 'createdAt' | 'updatedAt'>>
+      }
     }
   }
 }

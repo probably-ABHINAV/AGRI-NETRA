@@ -1,7 +1,6 @@
-
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { translate, getCurrentLanguage, setCurrentLanguage, getUserState, setUserState, getLanguagesForState } from '@/lib/i18n'
 
 interface LanguageContextType {
@@ -23,10 +22,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const savedLanguage = getCurrentLanguage()
     const savedState = getUserState()
-    
+
     setLanguageState(savedLanguage)
     setUserStateState(savedState)
-    
+
     if (savedState) {
       const stateLanguages = getLanguagesForState(savedState)
       setAvailableLanguages(stateLanguages)
@@ -47,11 +46,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setUserStateLocation = (state: string) => {
     setUserStateState(state)
     setUserState(state)
-    
+
     // Update available languages based on state
     const stateLanguages = getLanguagesForState(state)
     setAvailableLanguages(stateLanguages)
-    
+
     // If current language is not available for this state, switch to first available
     if (!stateLanguages.find(l => l.code === language)) {
       const firstLang = stateLanguages[0]?.code || 'en'
@@ -59,7 +58,51 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const t = (key: string) => translate(key, language)
+  const t = useCallback((key: string): string => {
+    if (!language || !translations[language]) {
+      // Fallback to English if current language not found
+      if (translations['en']) {
+        const keys = key.split('.')
+        let value: any = translations['en']
+
+        for (const k of keys) {
+          if (value && typeof value === 'object' && k in value) {
+            value = value[k]
+          } else {
+            return key
+          }
+        }
+
+        return typeof value === 'string' ? value : key
+      }
+      return key
+    }
+
+    const keys = key.split('.')
+    let value: any = translations[language]
+
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = value[k]
+      } else {
+        // Fallback to English if key not found in current language
+        if (translations['en']) {
+          let fallbackValue: any = translations['en']
+          for (const fallbackK of keys) {
+            if (fallbackValue && typeof fallbackValue === 'object' && fallbackK in fallbackValue) {
+              fallbackValue = fallbackValue[fallbackK]
+            } else {
+              return key
+            }
+          }
+          return typeof fallbackValue === 'string' ? fallbackValue : key
+        }
+        return key
+      }
+    }
+
+    return typeof value === 'string' ? value : key
+  }, [language])
 
   return React.createElement(
     LanguageContext.Provider,

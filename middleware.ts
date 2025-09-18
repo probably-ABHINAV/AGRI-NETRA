@@ -16,10 +16,12 @@ export async function middleware(request: NextRequest) {
   let isAuthenticated = false
   if (session) {
     try {
-      await decrypt(session)
-      isAuthenticated = true
+      const decrypted = await decrypt(session)
+      isAuthenticated = !!decrypted
     } catch (error) {
-      // Invalid session
+      // Invalid session - clear the cookie
+      console.warn('Invalid session detected:', error)
+      isAuthenticated = false
     }
   }
 

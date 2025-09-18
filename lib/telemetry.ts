@@ -1,34 +1,54 @@
 
 import { NodeSDK } from '@opentelemetry/sdk-node'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { Resource } from '@opentelemetry/resources'
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
-import type { Attributes } from '@opentelemetry/api'
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
+import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-node'
 
-const attributes: Attributes = {
-  // Provide the highlight project ID as a resource attribute
-  'highlight.project_id': 'ney010xd',
-  'service.name': 'smartfarm-backend',
-  'service.version': '1.0.0',
-  'deployment.environment': process.env.NODE_ENV || 'development'
+// Only initialize telemetry in production or when explicitly enabled
+const shouldInitializeTelemetry = process.env.NODE_ENV === 'production' || 
+  process.env.ENABLE_TELEMETRY === 'true'
+
+if (shouldInitializeTelemetry) {
+  try {
+    const sdk = new NodeSDK({
+      resource: new Resource({
+        [ATTR_SERVICE_NAME]: 'agri-netra-backend',
+        [ATTR_SERVICE_VERSION]: '1.0.0',
+      }),
+      spanProcessors: [
+        new BatchSpanProcessor(
+          new OTLPTraceExporter({
+            url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'https://otel.highlight.io:4318/v1/traces',
+            headers: {
+              'x-highlight-project': process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID || 'ney010xd',
+            },
+          })
+        ),
+      ],
+      instrumentations: [
+        new HttpInstrumentation({
+          // Avoid instrumenting internal Next.js requests
+          ignoredUrls: [
+            /\/_next\//,
+            /\/api\/health/,
+            /\/favicon\.ico/,
+            /\/robots\.txt/,
+          ],
+        }),
+        new ExpressInstrumentation(),
+      ],
+    })
+
+    sdk.start()
+    console.log('OpenTelemetry SDK initialized successfully')
+  } catch (error) {
+    console.warn('Failed to initialize OpenTelemetry SDK:', error)
+  }
+} else {
+  console.log('Telemetry disabled in development environment')
 }
 
-const sdk = new NodeSDK({
-  resource: new Resource(attributes),
-  traceExporter: new OTLPTraceExporter({
-    // URL for trace exports to Highlight.io
-    url: 'https://otel.highlight.io:4318/v1/traces',
-    headers: {
-      'x-highlight-project': 'ney010xd'
-    }
-  }),
-  instrumentations: [getNodeAutoInstrumentations()]
-})
-
-// Initialize the SDK
-if (process.env.NODE_ENV !== 'test') {
-  sdk.start()
-  console.log('OpenTelemetry tracing initialized successfully')
-}
-
-export { sdk }
+export {}
