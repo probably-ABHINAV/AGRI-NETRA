@@ -7,15 +7,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User, Edit, Save, Camera, Phone, MapPin, Briefcase, Languages, Leaf } from "lucide-react"
+import { User, Edit, Save, Camera, Phone, MapPin, Briefcase, Languages, Leaf, Building } from "lucide-react" // Added Building icon
 import { useLanguage } from "@/hooks/use-language"
 
-// Mock user profile data - in a real app, this would be fetched
+// Mock user profile data - updated with city
 const mockUserProfile = {
   fullName: "John Farmer",
   email: "farmer@example.com",
   phone: "+91 98765 43210",
-  location: "Punjab, India",
+  city: "Noida", // New city field
+  state: "Uttar Pradesh",
+  country: "India",
   farmSize: 25.5,
   experience: 15,
   language: "en",
@@ -27,14 +29,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState(mockUserProfile)
   const { t } = useLanguage()
 
-  // In a real application, you would fetch the user profile
   useEffect(() => {
-    // async function fetchProfile() {
-    //   const response = await fetch('/api/profile');
-    //   const data = await response.json();
-    //   setProfile(data);
-    // }
-    // fetchProfile();
+    // In a real app, you would fetch this data
   }, [])
 
   const handleInputChange = (field: string, value: string | number) => {
@@ -42,12 +38,6 @@ export default function ProfilePage() {
   }
 
   const handleSave = async () => {
-    // In a real application, you would send a POST/PUT request to your API
-    // await fetch('/api/profile', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(profile),
-    // });
     console.log("Saving profile:", profile)
     setIsEditMode(false)
   }
@@ -107,20 +97,14 @@ export default function ProfilePage() {
                   <Label htmlFor="phone" className="flex items-center gap-2"><Phone className="h-4 w-4" /> Phone Number</Label>
                   <Input id="phone" value={profile.phone} disabled={!isEditMode} onChange={e => handleInputChange('phone', e.target.value)} />
                 </div>
+                {/* New City Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="location" className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Location</Label>
-                  <Input id="location" value={profile.location} disabled={!isEditMode} onChange={e => handleInputChange('location', e.target.value)} />
+                  <Label htmlFor="city" className="flex items-center gap-2"><Building className="h-4 w-4" /> City</Label>
+                  <Input id="city" value={profile.city} disabled={!isEditMode} onChange={e => handleInputChange('city', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="language" className="flex items-center gap-2"><Languages className="h-4 w-4" /> Preferred Language</Label>
-                  <Select value={profile.language} disabled={!isEditMode} onValueChange={value => handleInputChange('language', value)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="hi">हिंदी (Hindi)</SelectItem>
-                      <SelectItem value="pa">ਪੰਜਾਬੀ (Punjabi)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="state" className="flex items-center gap-2"><MapPin className="h-4 w-4" /> State</Label>
+                  <Input id="state" value={profile.state} disabled={!isEditMode} onChange={e => handleInputChange('state', e.target.value)} />
                 </div>
               </div>
             </div>

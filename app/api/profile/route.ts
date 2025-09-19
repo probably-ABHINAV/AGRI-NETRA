@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUser } from '@/lib/auth'
 
-// In-memory storage for demo purposes
+// In-memory storage for demo purposes - updated with city
 let userProfiles: Record<string, any> = {
   'farmer@example.com': {
     fullName: "John Farmer",
     email: "farmer@example.com",
     phone: "+91 98765 43210",
-    location: "Punjab, India",
+    city: "Noida", // New city field
+    state: "Uttar Pradesh",
+    country: "India",
     farmSize: 25.5,
     experience: 15,
     language: "en",
@@ -25,8 +27,8 @@ export async function GET() {
   const profile = userProfiles[user.email] || {
     email: user.email,
     fullName: 'New User',
+    city: 'Noida', // Default city
     phone: '',
-    location: '',
   };
 
   return NextResponse.json(profile);
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest) {
   userProfiles[user.email] = {
     ...userProfiles[user.email],
     ...body,
-    email: user.email, // Ensure email cannot be changed
+    email: user.email,
   };
 
   return NextResponse.json({ success: true, data: userProfiles[user.email] });
