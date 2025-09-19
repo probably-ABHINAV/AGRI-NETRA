@@ -49,7 +49,8 @@ export async function GET(request: NextRequest) {
         highlight: "✅ Enabled",
         opentelemetry: "✅ Enabled"
       },
-      ..testData: {
+      ...testData, // Corrected spread syntax
+      meta: { // Added meta object for additional data
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
         version: '1.0.0'
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(
       { status: 'error', message: 'Backend test failed' },
-      { status: 500 }us: 500 }
+      { status: 500 }
     )
   }
 }
