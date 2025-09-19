@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -134,7 +133,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="lg:pl-64 min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl space-y-6">
         {/* Header Section */}
         <div className="bg-white rounded-lg p-6 shadow-sm border">

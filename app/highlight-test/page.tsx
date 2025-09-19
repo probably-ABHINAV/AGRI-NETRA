@@ -1,4 +1,3 @@
-
 'use client';
 
 import { H } from '@highlight-run/next/client';
@@ -56,7 +55,7 @@ export default function HighlightTestPage() {
   };
 
   return (
-    <div className="lg:pl-64">
+    <div>
       <div className="p-6 max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Highlight.io Test Page</h1>
