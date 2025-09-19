@@ -39,13 +39,13 @@ function Navigation() {
   const { t } = useLanguage()
 
   const navigationItems = [
-    { name: t('nav.dashboard') || 'Dashboard', href: "/dashboard", icon: Home, adminOnly: false },
-    { name: t('nav.recommendations') || 'Crop Advice', href: "/crop-recommendations", icon: Brain, adminOnly: false },
-    { name: t('nav.pest-detection') || 'Pest Detection', href: "/pest-detection", icon: Bug, adminOnly: false },
-    { name: t('nav.sensors') || 'IoT Sensors', href: "/sensors", icon: Zap, adminOnly: false },
-    { name: t('nav.analytics') || 'Analytics', href: "/analytics", icon: BarChart3, adminOnly: false },
-    { name: t('nav.chat') || 'Expert Chat', href: "/chat", icon: MessageSquare, badge: 3, adminOnly: false },
-    { name: t('nav.admin') || 'Admin Panel', href: "/admin", icon: Shield, adminOnly: true },
+    { name: t('Dashboard') || 'Dashboard', href: "/dashboard", icon: Home, adminOnly: false },
+    { name: t('Recommendations') || 'Crop Advice', href: "/crop-recommendations", icon: Brain, adminOnly: false },
+    { name: t('Pest Detection') || 'Pest Detection', href: "/pest-detection", icon: Bug, adminOnly: false },
+    { name: t('Nav Sensors') || 'IoT Sensors', href: "/sensors", icon: Zap, adminOnly: false },
+    { name: t('Analytics') || 'Analytics', href: "/analytics", icon: BarChart3, adminOnly: false },
+    { name: t('Chat') || 'Expert Chat', href: "/chat", icon: MessageSquare, badge: 3, adminOnly: false },
+    { name: t('Admin') || 'Admin Panel', href: "/admin", icon: Shield, adminOnly: true },
   ]
 
   const visibleNavigationItems = navigationItems.filter(item => !item.adminOnly);

@@ -67,3 +67,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
+
+    const alert = await db.createPestAlert({
+      farmId,
+      cropId,
+      pestType,
+      severity: severity || "medium",
+      description,
+      location,
+      imageUrl: imageUrl || undefined,
+      status: "active",
+    })
+
+    return NextResponse.json({ alert }, { status: 201 })
+  } catch (error) {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}

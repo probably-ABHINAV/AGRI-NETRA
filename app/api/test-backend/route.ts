@@ -49,8 +49,7 @@ export async function GET(request: NextRequest) {
         highlight: "✅ Enabled",
         opentelemetry: "✅ Enabled"
       },
-      ...testData, // Corrected spread operator
-      meta: {
+      ..testData: {
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
         version: '1.0.0'
@@ -68,7 +67,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(
       { status: 'error', message: 'Backend test failed' },
-      { status: 500 }
+      { status: 500 }us: 500 }
     )
   }
 }
