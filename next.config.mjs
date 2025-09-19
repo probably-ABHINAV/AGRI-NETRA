@@ -18,7 +18,7 @@ const nextConfig = {
   // Configure for Replit environment
   webpack: (config, { isServer }) => {
     // Reduce webpack cache warnings
-    if (!isServer) {
+    if (!isServer && config.optimization?.splitChunks?.cacheGroups?.default) {
       config.optimization.splitChunks.cacheGroups.default.minSize = 0;
     }
     return config;

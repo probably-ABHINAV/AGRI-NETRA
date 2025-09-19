@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUser } from '@/lib/auth'
-import { H } from '@highlight-run/next/server'
 
 export async function GET(request: NextRequest) {
-  const { span } = H.startWithHeaders('test-backend', {})
 
   try {
     // Get current user session
@@ -53,17 +51,9 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Backend test failed:', error)
 
-    // Track error with Highlight
-    H.consumeError(error as Error, {
-      category: 'API',
-      level: 'error'
-    });
-
-    return NextResponse.json(
-      { status: 'error', message: 'Backend test failed' },
-      { status: 500 }
-    )
-  } finally {
-    span.end()
+    return NextResponse.json({
+      status: 'error',
+      message: 'Backend test failed'
+    }, { status: 500 })
   }
 }

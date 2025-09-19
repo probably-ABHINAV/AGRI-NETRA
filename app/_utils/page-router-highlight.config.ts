@@ -1,6 +1,5 @@
 
-import { withHighlight } from '@highlight-run/next/server'
-
-export const withPageRouterHighlight = withHighlight({
-  projectID: 'ney010xd',
-})
+// Highlight.io integration removed
+export const withPageRouterHighlight = (handler: any) => {
+  return handler
+}

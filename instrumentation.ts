@@ -1,6 +1,6 @@
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('./lib/telemetry')
+    console.log('Instrumentation loaded (no active telemetry)')
   }
 }

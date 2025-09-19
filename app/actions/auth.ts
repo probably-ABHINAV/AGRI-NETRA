@@ -46,19 +46,19 @@ export async function registerAction(formData: FormData) {
     const state = formData.get('state') as string
 
     if (!email || !password || !name) {
-      throw new Error('Email, password, and name are required')
+      redirect('/auth/signup?error=Email, password, and name are required')
     }
 
     if (!email.includes('@')) {
-      throw new Error('Invalid email format')
+      redirect('/auth/signup?error=Invalid email format')
     }
 
-    if (password.length < 6) {
-      throw new Error('Password must be at least 6 characters')
+    if (password.length < 8) {
+      redirect('/auth/signup?error=Password must be at least 8 characters')
     }
 
     if (name.trim().length < 2) {
-      throw new Error('Name must be at least 2 characters')
+      redirect('/auth/signup?error=Name must be at least 2 characters')
     }
 
     // Register user in database
@@ -71,9 +71,10 @@ export async function registerAction(formData: FormData) {
       state: state || undefined
     })
 
-    redirect('/auth/login?message=Registration successful! Please login.')
+    redirect('/auth/login?message=Registration successful! Please login with your new credentials.')
   } catch (error) {
     console.error('Registration error:', error)
-    throw new Error(error instanceof Error ? error.message : 'Registration failed')
+    const errorMessage = error instanceof Error ? error.message : 'Registration failed'
+    redirect(`/auth/signup?error=${encodeURIComponent(errorMessage)}`)
   }
 }

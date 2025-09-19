@@ -1,5 +1,62 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types'
+
+// Database schema types matching the actual Supabase schema
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          full_name: string
+          phone?: string
+          role: 'farmer' | 'expert' | 'admin'
+          location?: string
+          farm_size?: number
+          experience_years?: number
+          preferred_language: string
+          avatar_url?: string
+          password_hash?: string
+          is_verified: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          full_name: string
+          phone?: string
+          role?: 'farmer' | 'expert' | 'admin'
+          location?: string
+          farm_size?: number
+          experience_years?: number
+          preferred_language?: string
+          avatar_url?: string
+          password_hash?: string
+          is_verified?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string
+          phone?: string
+          role?: 'farmer' | 'expert' | 'admin'
+          location?: string
+          farm_size?: number
+          experience_years?: number
+          preferred_language?: string
+          avatar_url?: string
+          password_hash?: string
+          is_verified?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+    }
+  }
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -20,7 +77,9 @@ export const isSupabaseConfigured = () => {
 }
 
 // Create a default instance for server-side use
-export const supabase = createClient()
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey) 
+  : null
 
 // Server-side authentication helpers
 export async function getAuthenticatedUser(request: Request) {

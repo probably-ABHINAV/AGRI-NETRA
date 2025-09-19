@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server'
 import { getUser } from '@/lib/auth'
 
@@ -21,7 +20,7 @@ export async function GET() {
     }
 
     const userFarms = farms.filter(farm => farm.userId === user.email)
-    return NextResponse.json({ success: true, data: userFarms })
+    return NextResponse.json({ success: true, data: userFarms }, { status: 200 })
   } catch (error) {
     console.error('Error fetching farms:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -36,11 +35,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    
+
     // Validate required fields
     if (!body.name || !body.location || !body.size || !body.soilType) {
       return NextResponse.json(
-        { error: 'Missing required fields: name, location, size, soilType' }, 
+        { error: 'Missing required fields: name, location, size, soilType' },
         { status: 400 }
       )
     }
