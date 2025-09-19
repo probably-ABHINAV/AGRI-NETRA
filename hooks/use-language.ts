@@ -59,11 +59,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   const t = useCallback((key: string): string => {
-    if (!language || !translations[language]) {
+    if (!language || !translate[language]) {
       // Fallback to English if current language not found
-      if (translations['en']) {
+      if (translate['en']) {
         const keys = key.split('.')
-        let value: any = translations['en']
+        let value: any = translate['en']
 
         for (const k of keys) {
           if (value && typeof value === 'object' && k in value) {

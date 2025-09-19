@@ -1,207 +1,111 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import {
-  Camera,
-  Upload,
-  ArrowLeft,
-  Scan,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Eye,
-  Download,
-  History,
-  Zap,
-  Bug,
-  Leaf,
-  Shield,
-  TrendingUp,
-  Clock,
+  Camera, Upload, ArrowLeft, Scan, AlertTriangle, History, Zap, Bug, Shield, Star, Leaf, RefreshCw
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
-// Mock detection results
-const mockDetectionResult = {
-  pest: "Aphids",
-  scientificName: "Aphidoidea",
-  confidence: 94,
-  severity: "Medium",
-  affectedArea: "15%",
-  cropStage: "Vegetative",
-  detectionTime: "2024-01-15T10:30:00Z",
-  treatments: [
-    {
-      type: "Organic",
-      name: "Neem Oil Spray",
-      description: "Apply 2-3ml neem oil per liter of water",
-      effectiveness: 85,
-      cost: "₹150/acre",
-      duration: "3-5 days",
-    },
-    {
-      type: "Chemical",
-      name: "Imidacloprid",
-      description: "Apply 0.3ml per liter of water",
-      effectiveness: 95,
-      cost: "₹300/acre",
-      duration: "1-2 days",
-    },
-    {
-      type: "Biological",
-      name: "Ladybird Beetles",
-      description: "Release beneficial insects",
-      effectiveness: 80,
-      cost: "₹200/acre",
-      duration: "7-10 days",
-    },
-  ],
-  prevention: [
-    "Regular monitoring of crop health",
-    "Maintain proper plant spacing",
-    "Remove infected plant parts",
-    "Use yellow sticky traps",
-  ],
-  riskFactors: ["High humidity levels", "Dense plant canopy", "Previous pest history"],
-}
-
 const mockDetectionHistory = [
-  {
-    id: 1,
-    date: "2024-01-15",
-    pest: "Aphids",
-    crop: "Tomato",
-    severity: "Medium",
-    confidence: 94,
-    status: "Treated",
-  },
-  {
-    id: 2,
-    date: "2024-01-12",
-    pest: "Leaf Blight",
-    crop: "Rice",
-    severity: "High",
-    confidence: 89,
-    status: "Under Treatment",
-  },
-  {
-    id: 3,
-    date: "2024-01-10",
-    pest: "Whitefly",
-    crop: "Cotton",
-    severity: "Low",
-    confidence: 76,
-    status: "Monitored",
-  },
-]
+  { id: 1, date: "2024-01-15", pest: "Aphids", crop: "Tomato", severity: "Medium", status: "Treated" },
+  { id: 2, date: "2024-01-12", pest: "Leaf Blight", crop: "Rice", severity: "High", status: "Under Treatment" },
+];
 
 export default function PestDetectionPage() {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [detectionResult, setDetectionResult] = useState<typeof mockDetectionResult | null>(null)
-  const [dragActive, setDragActive] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [cropType, setCropType] = useState("tomato");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = useCallback((file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      setSelectedImage(e.target?.result as string)
-      setDetectionResult(null)
-    }
-    reader.readAsDataURL(file)
-  }, [])
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => setImagePreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+    setAnalysisResult(null);
+    setError(null);
+  }, []);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
-  }, [])
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+    else if (e.type === "dragleave") setDragActive(false);
+  }, []);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setDragActive(false)
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) handleImageUpload(e.dataTransfer.files[0]);
+  }, [handleImageUpload]);
 
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        handleImageUpload(e.dataTransfer.files[0])
-      }
-    },
-    [handleImageUpload],
-  )
-
-  const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-        handleImageUpload(e.target.files[0])
-      }
-    },
-    [handleImageUpload],
-  )
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) handleImageUpload(e.target.files[0]);
+  }, [handleImageUpload]);
 
   const analyzeImage = async () => {
-    if (!selectedImage) return
+    if (!imageFile) return;
 
-    setIsAnalyzing(true)
-    // Simulate AI analysis
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-    setDetectionResult(mockDetectionResult)
-    setIsAnalyzing(false)
-  }
+    setIsAnalyzing(true);
+    setError(null);
+    setAnalysisResult(null);
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity.toLowerCase()) {
-      case "low":
-        return "bg-green-100 text-green-800"
-      case "medium":
-        return "bg-yellow-100 text-yellow-800"
-      case "high":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    formData.append('cropType', cropType);
+
+    try {
+      const response = await fetch('/api/pest-detection', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to analyze image.');
+      }
+      
+      setAnalysisResult(data.analysis);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+    } finally {
+      setIsAnalyzing(false);
     }
-  }
-
+  };
+  
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "treated":
-        return "bg-green-100 text-green-800"
-      case "under treatment":
-        return "bg-blue-100 text-blue-800"
-      case "monitored":
-        return "bg-yellow-100 text-yellow-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+      case "treated": return "bg-green-100 text-green-800";
+      case "under treatment": return "bg-blue-100 text-blue-800";
+      case "monitored": return "bg-yellow-100 text-yellow-800";
+      default: return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/dashboard">
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Pest & Disease Detection</h1>
-              <p className="text-gray-600">AI-powered image analysis for crop health monitoring</p>
-            </div>
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="px-6 py-4 flex items-center gap-4">
+          <Button variant="ghost" size="sm" asChild><Link href="/dashboard"><ArrowLeft className="h-4 w-4" /></Link></Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Pest & Disease Detection</h1>
+            <p className="text-gray-600">AI-powered image analysis for crop health monitoring</p>
           </div>
         </div>
       </header>
@@ -214,286 +118,68 @@ export default function PestDetectionPage() {
           </TabsList>
 
           <TabsContent value="detection" className="space-y-6">
-            {/* Image Upload Section */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Camera className="h-5 w-5" />
-                  Upload Crop Image
-                </CardTitle>
-                <CardDescription>
-                  Take a clear photo of the affected crop area or upload an existing image for AI analysis
-                </CardDescription>
+                <CardTitle className="flex items-center gap-2"><Camera className="h-5 w-5" />Upload Crop Image</CardTitle>
+                <CardDescription>Take a clear photo or upload an image for AI analysis.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                    dragActive
-                      ? "border-blue-500 bg-blue-50"
-                      : selectedImage
-                        ? "border-green-500 bg-green-50"
-                        : "border-gray-300 hover:border-gray-400"
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  {selectedImage ? (
+              <CardContent onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}>
+                <div className="grid md:grid-cols-2 gap-6 items-start">
                     <div className="space-y-4">
-                      <div className="relative w-full max-w-md mx-auto">
-                        <Image
-                          src={selectedImage || "/placeholder.svg"}
-                          alt="Selected crop image"
-                          width={400}
-                          height={300}
-                          className="rounded-lg object-cover w-full h-64"
-                        />
-                      </div>
-                      <div className="flex gap-3 justify-center">
-                        <Button onClick={analyzeImage} disabled={isAnalyzing} className="flex items-center gap-2">
-                          {isAnalyzing ? (
-                            <>
-                              <Scan className="h-4 w-4 animate-pulse" />
-                              Analyzing...
-                            </>
-                          ) : (
-                            <>
-                              <Zap className="h-4 w-4" />
-                              Analyze with AI
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedImage(null)
-                            setDetectionResult(null)
-                          }}
-                          className="bg-transparent"
-                        >
-                          Remove Image
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                        <Upload className="h-8 w-8 text-gray-400" />
-                      </div>
-                      <div>
-                        <p className="text-lg font-medium text-gray-900 mb-2">Upload or drag an image</p>
-                        <p className="text-gray-600 mb-4">Supported formats: JPG, PNG, WebP (max 10MB)</p>
-                        <div className="flex gap-3 justify-center">
-                          <Button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2">
-                            <Upload className="h-4 w-4" />
-                            Choose File
-                          </Button>
-                          <Button variant="outline" className="flex items-center gap-2 bg-transparent">
-                            <Camera className="h-4 w-4" />
-                            Take Photo
-                          </Button>
+                        <div className="space-y-2">
+                           <Label htmlFor="cropType">Select Crop Type</Label>
+                           <Select value={cropType} onValueChange={setCropType}>
+                             <SelectTrigger id="cropType"><SelectValue /></SelectTrigger>
+                             <SelectContent>
+                               <SelectItem value="tomato">Tomato</SelectItem>
+                               <SelectItem value="rice">Rice</SelectItem>
+                               <SelectItem value="wheat">Wheat</SelectItem>
+                               <SelectItem value="cotton">Cotton</SelectItem>
+                               <SelectItem value="maize">Maize</SelectItem>
+                             </SelectContent>
+                           </Select>
                         </div>
-                      </div>
+                        <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}>
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"><Upload className="h-8 w-8 text-gray-400" /></div>
+                            <p className="text-lg font-medium text-gray-900 mb-2">Drag & drop or click to upload</p>
+                            <p className="text-gray-600 mb-4">JPG, PNG, WebP (max 10MB)</p>
+                            <Button onClick={() => fileInputRef.current?.click()} className="w-full"><Upload className="h-4 w-4 mr-2" />Choose File</Button>
+                        </div>
                     </div>
-                  )}
+                    {imagePreview && (
+                      <div className="space-y-4">
+                        <p className="font-medium text-center">Image Preview</p>
+                        <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+                          <Image src={imagePreview} alt="Selected crop" layout="fill" className="object-cover" />
+                        </div>
+                        <Button onClick={analyzeImage} disabled={isAnalyzing || !imageFile} className="w-full">
+                          {isAnalyzing ? <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Analyzing...</> : <><Zap className="h-4 w-4 mr-2" />Analyze with AI</>}
+                        </Button>
+                      </div>
+                    )}
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
               </CardContent>
             </Card>
 
-            {/* Analysis Progress */}
-            {isAnalyzing && (
-              <Card>
-                <CardContent className="py-8">
-                  <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                      <Scan className="h-8 w-8 text-blue-600 animate-pulse" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Analysis in Progress</h3>
-                      <p className="text-gray-600 mb-4">
-                        Our advanced AI models are analyzing your crop image for pests and diseases...
-                      </p>
-                      <Progress value={75} className="max-w-md mx-auto h-2" />
-                      <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
-                    </div>
-                  </div>
+            {isAnalyzing && (<Card><CardContent className="py-12 text-center"><Zap className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" /><h3 className="text-lg font-semibold">AI is analyzing your crop...</h3><p className="text-muted-foreground">This may take a few moments.</p></CardContent></Card>)}
+            {error && (<Card className="border-red-500 bg-red-50"><CardContent className="py-6 text-center text-red-700"><AlertTriangle className="h-8 w-8 mx-auto mb-2" /><h3 className="font-semibold">Analysis Failed</h3><p className="text-sm">{error}</p></CardContent></Card>)}
+            {analysisResult && (
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Star className="h-5 w-5 text-yellow-500"/> AI Analysis Complete</CardTitle>
+                </CardHeader>
+                <CardContent className="prose max-w-none prose-headings:font-semibold prose-h3:text-lg prose-h4:font-medium prose-ul:list-disc prose-li:ml-4">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysisResult}</ReactMarkdown>
                 </CardContent>
               </Card>
-            )}
-
-            {/* Detection Results */}
-            {detectionResult && !isAnalyzing && (
-              <div className="space-y-6">
-                {/* Detection Summary */}
-                <Card className="border-l-4 border-l-yellow-500">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                          <Bug className="h-6 w-6 text-red-600" />
-                          {detectionResult.pest} Detected
-                        </CardTitle>
-                        <CardDescription className="italic text-base">{detectionResult.scientificName}</CardDescription>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm text-gray-600">Confidence</span>
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                            {detectionResult.confidence}%
-                          </Badge>
-                        </div>
-                        <Progress value={detectionResult.confidence} className="w-24 h-2" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-1 mb-1">
-                          <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                          <span className="text-sm font-medium text-gray-600">Severity</span>
-                        </div>
-                        <Badge className={getSeverityColor(detectionResult.severity)}>{detectionResult.severity}</Badge>
-                      </div>
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-1 mb-1">
-                          <Eye className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium text-gray-600">Affected Area</span>
-                        </div>
-                        <p className="font-bold text-gray-900">{detectionResult.affectedArea}</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-1 mb-1">
-                          <Leaf className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-gray-600">Crop Stage</span>
-                        </div>
-                        <p className="font-bold text-gray-900">{detectionResult.cropStage}</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-1 mb-1">
-                          <Clock className="h-4 w-4 text-purple-600" />
-                          <span className="text-sm font-medium text-gray-600">Detected</span>
-                        </div>
-                        <p className="font-bold text-gray-900">Just now</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Treatment Recommendations */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      Treatment Recommendations
-                    </CardTitle>
-                    <CardDescription>AI-suggested treatments ranked by effectiveness</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {detectionResult.treatments.map((treatment, index) => (
-                        <div key={index} className="p-4 border rounded-lg hover:bg-gray-50">
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold text-gray-900">{treatment.name}</h4>
-                                <Badge variant="outline" className="text-xs">
-                                  {treatment.type}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-gray-600">{treatment.description}</p>
-                            </div>
-                            <div className="text-right">
-                              <div className="flex items-center gap-2 mb-1">
-                                <TrendingUp className="h-4 w-4 text-green-600" />
-                                <span className="font-bold text-green-600">{treatment.effectiveness}%</span>
-                              </div>
-                              <Progress value={treatment.effectiveness} className="w-20 h-2" />
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">Cost: </span>
-                              <span className="font-medium">{treatment.cost}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Duration: </span>
-                              <span className="font-medium">{treatment.duration}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Prevention & Risk Factors */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-green-700">
-                        <CheckCircle className="h-5 w-5" />
-                        Prevention Tips
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {detectionResult.prevention.map((tip, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0" />
-                            {tip}
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-red-700">
-                        <XCircle className="h-5 w-5" />
-                        Risk Factors
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {detectionResult.riskFactors.map((factor, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0" />
-                            {factor}
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button className="flex items-center gap-2">
-                    <Download className="h-4 w-4" />
-                    Download Report
-                  </Button>
-                  <Button variant="outline" className="bg-transparent">
-                    Schedule Treatment
-                  </Button>
-                  <Button variant="outline" className="bg-transparent">
-                    Consult Expert
-                  </Button>
-                </div>
-              </div>
             )}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <History className="h-5 w-5" />
-                  Detection History
-                </CardTitle>
+                <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" />Detection History</CardTitle>
                 <CardDescription>Previous pest and disease detections on your farm</CardDescription>
               </CardHeader>
               <CardContent>
@@ -501,20 +187,14 @@ export default function PestDetectionPage() {
                   {mockDetectionHistory.map((detection) => (
                     <div key={detection.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                          <Bug className="h-5 w-5 text-red-600" />
-                        </div>
+                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center"><Bug className="h-5 w-5 text-red-600" /></div>
                         <div>
                           <h4 className="font-semibold text-gray-900">{detection.pest}</h4>
-                          <p className="text-sm text-gray-600">
-                            {detection.crop} • {detection.date}
-                          </p>
+                          <p className="text-sm text-gray-600">{detection.crop} • {detection.date}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Badge className={getSeverityColor(detection.severity)}>{detection.severity}</Badge>
                         <Badge className={getStatusColor(detection.status)}>{detection.status}</Badge>
-                        <span className="text-sm text-gray-600">{detection.confidence}%</span>
                       </div>
                     </div>
                   ))}

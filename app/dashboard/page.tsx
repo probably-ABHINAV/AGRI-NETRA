@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -6,426 +5,179 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from "@/components/ui/dialog"
+import { LineChart, Line, ResponsiveContainer, Tooltip } from 'recharts'
 import {
-  Cloud,
-  CloudRain,
-  Sun,
-  Droplets,
-  Wind,
-  Eye,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Sprout,
-  BarChart3,
-  Camera,
-  MessageSquare,
-  Plus,
-  Calendar,
-  MapPin,
-  Thermometer,
-  Activity,
+  AlertTriangle, BarChart3, Bell, Brain, Calendar, Cloud, CloudRain, Droplets, Leaf, ListTodo, Map, Plus, Sun, TrendingUp, Wind, Zap, Trash2, Loader2
 } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/hooks/use-language"
 
-// Mock data - will be replaced with real API calls
+// --- ENHANCED MOCK DATA ---
 const mockWeatherData = {
-  current: {
-    temperature: 28,
-    humidity: 65,
-    windSpeed: 12,
-    condition: "Partly Cloudy",
-    icon: "partly-cloudy",
-    pressure: 1013,
-    uvIndex: 6,
-  },
+  current: { temp: 29, feelsLike: 32, condition: "Sunny", humidity: 60, wind: 15 },
   forecast: [
-    { day: "Today", high: 32, low: 24, condition: "Sunny", rain: 0 },
-    { day: "Tomorrow", high: 30, low: 22, condition: "Partly Cloudy", rain: 10 },
-    { day: "Wed", high: 28, low: 20, condition: "Rainy", rain: 80 },
-    { day: "Thu", high: 26, low: 18, condition: "Cloudy", rain: 40 },
-    { day: "Fri", high: 29, low: 21, condition: "Sunny", rain: 5 },
+    { day: "Mon", high: 32, low: 24, condition: "Sunny" },
+    { day: "Tue", high: 33, low: 25, condition: "Partly Cloudy" },
+    { day: "Wed", high: 31, low: 23, condition: "Scattered Showers" },
+    { day: "Thu", high: 30, low: 22, condition: "Rainy" },
+    { day: "Fri", high: 32, low: 24, condition: "Sunny" },
   ],
 }
-
-const mockFarmData = {
-  totalArea: 25.5,
-  activeFields: 8,
-  currentCrops: ["Rice", "Wheat", "Tomato", "Onion"],
-  sensors: {
-    active: 12,
-    total: 15,
-  },
-  alerts: [
-    { id: 1, type: "warning", message: "dashboard.alerts.soilMoistureLow", time: "2 hours ago" },
-    { id: 2, type: "info", message: "dashboard.alerts.weatherAlert", time: "4 hours ago" },
-    { id: 3, type: "success", message: "dashboard.alerts.irrigationComplete", time: "6 hours ago" },
-  ],
-}
-
-const mockSensorData = [
-  { name: "dashboard.sensors.soilMoisture", value: 45, unit: "%", status: "low", trend: "down" },
-  { name: "dashboard.sensors.temperature", value: 28, unit: "°C", status: "normal", trend: "up" },
-  { name: "dashboard.sensors.phLevel", value: 6.8, unit: "pH", status: "normal", trend: "stable" },
-  { name: "dashboard.sensors.nitrogen", value: 32, unit: "ppm", status: "high", trend: "up" },
+const initialTasks = [
+  { id: 1, text: "Irrigate Field A (Wheat)", completed: false, priority: "high" },
+  { id: 2, text: "Apply NPK fertilizer to Field B (Rice)", completed: false, priority: "high" },
+  { id: 3, text: "Scout for pests in Tomato patch", completed: true, priority: "medium" },
+  { id: 4, text: "Check water levels in main reservoir", completed: false, priority: "low" },
 ]
+const mockMarketPrices = [
+  { crop: "Wheat", price: 2150, trend: "up" },
+  { crop: "Rice (Basmati)", price: 3800, trend: "down" },
+  { crop: "Tomato", price: 1800, trend: "up" },
+]
+const mockFarmLayout = [
+  { id: "A", crop: "Wheat", status: "good", alert: false },
+  { id: "B", crop: "Rice", status: "warning", alert: true },
+  { id: "C", crop: "Tomato", status: "good", alert: false },
+  { id: "D", crop: "Fallow", status: "neutral", alert: false },
+]
+const mockCropOverview = [
+    { name: "Wheat", field: "Field A", health: 95, stage: "Flowering", estHarvest: "45 days" },
+    { name: "Rice", field: "Field B", health: 78, stage: "Tillering", estHarvest: "60 days" },
+    { name: "Tomato", field: "Field C", health: 92, stage: "Fruiting", estHarvest: "25 days" },
+]
+const moistureData = [
+    { day: 'Mon', value: 65 }, { day: 'Tue', value: 68 }, { day: 'Wed', value: 70 },
+    { day: 'Thu', value: 67 }, { day: 'Fri', value: 69 }, { day: 'Sat', value: 72 }, { day: 'Sun', value: 68 }
+];
 
+interface UserProfile { fullName: string; email: string; city?: string; }
+interface WeatherData {
+  current: { temp: number; feelsLike: number; condition: string; humidity: number; wind: number };
+  forecast: { day: string; high: number; low: number; condition: string }[];
+}
+
+
+// --- DASHBOARD COMPONENT ---
 export default function DashboardPage() {
-  const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const { t } = useLanguage()
+  const [tasks, setTasks] = useState(initialTasks)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [newTaskText, setNewTaskText] = useState("");
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
 
   useEffect(() => {
-    // Set initial time only on client to prevent hydration mismatch
-    setCurrentTime(new Date())
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
-    return () => clearInterval(timer)
+    async function fetchAndLoadData() {
+      setWeatherLoading(true);
+      try {
+        const profileResponse = await fetch('/api/profile');
+        let city = 'Noida';
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setProfile(profileData);
+          if (profileData.city) {
+            city = profileData.city;
+          }
+        }
+        
+        const weatherResponse = await fetch(`/api/weather?city=${city}`);
+        if(weatherResponse.ok) {
+          setWeatherData(await weatherResponse.json());
+        } else {
+          console.error("Failed to fetch weather data");
+          setWeatherData(null);
+        }
+      } catch (error) { 
+        console.error("Error loading dashboard data:", error);
+        setWeatherData(null);
+      } finally {
+        setWeatherLoading(false);
+      }
+    }
+    fetchAndLoadData();
   }, [])
 
-  const getWeatherIcon = (condition: string) => {
-    switch (condition.toLowerCase()) {
-      case "sunny":
-        return <Sun className="h-8 w-8 text-yellow-500" />
-      case "partly cloudy":
-        return <Cloud className="h-8 w-8 text-gray-500" />
-      case "rainy":
-        return <CloudRain className="h-8 w-8 text-blue-500" />
-      default:
-        return <Cloud className="h-8 w-8 text-gray-500" />
+  const handleTaskToggle = (id: number) => setTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task));
+  const handleAddTask = () => {
+    if(newTaskText.trim()) {
+      const newTask = { id: Date.now(), text: newTaskText, completed: false, priority: 'medium' };
+      setTasks([newTask, ...tasks]);
+      setNewTaskText("");
     }
+  }
+  const handleClearCompleted = () => setTasks(tasks.filter(task => !task.completed));
+
+  const getWeatherIcon = (condition: string, size = "h-6 w-6") => {
+    const lowerCaseCondition = condition.toLowerCase();
+    if (lowerCaseCondition.includes("sunny") || lowerCaseCondition.includes("clear")) return <Sun className={`${size} text-yellow-400`} />;
+    if (lowerCaseCondition.includes("partly cloudy")) return <Cloud className={`${size} text-gray-400`} />;
+    if (lowerCaseCondition.includes("cloudy") || lowerCaseCondition.includes("overcast")) return <Cloud className={`${size} text-gray-500`} />;
+    if (lowerCaseCondition.includes("rain") || lowerCaseCondition.includes("showers") || lowerCaseCondition.includes("drizzle")) return <CloudRain className={`${size} text-blue-400`} />;
+    return <Cloud className={`${size} text-gray-400`} />;
+  };
+
+  const getPriorityColor = (priority: string) => {
+    if (priority === 'high') return 'border-l-red-500';
+    if (priority === 'medium') return 'border-l-yellow-500';
+    return 'border-l-gray-300';
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "low":
-        return "text-red-600 bg-red-50 border-red-200"
-      case "high":
-        return "text-orange-600 bg-orange-50 border-orange-200"
-      case "normal":
-        return "text-green-600 bg-green-50 border-green-200"
-      default:
-        return "text-gray-600 bg-gray-50 border-gray-200"
-    }
-  }
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case "up":
-        return <TrendingUp className="h-4 w-4 text-green-600" />
-      case "down":
-        return <TrendingDown className="h-4 w-4 text-red-600" />
-      default:
-        return <Activity className="h-4 w-4 text-gray-400" />
-    }
-  }
-
-  const getAlertIcon = (type: string) => {
-    switch (type) {
-      case "warning":
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />
-      case "info":
-        return <Activity className="h-4 w-4 text-blue-500" />
-      case "success":
-        return <Activity className="h-4 w-4 text-green-500" />
-      default:
-        return <Activity className="h-4 w-4 text-gray-400" />
-    }
-  }
+  const completedTasksCount = tasks.filter(t => t.completed).length;
+  const totalTasksCount = tasks.length;
+  const tasksProgress = totalTasksCount > 0 ? (completedTasksCount / totalTasksCount) * 100 : 0;
 
   return (
-    <div className="lg:pl-64 min-h-screen bg-gray-50">
-      <div className="container mx-auto p-4 md:p-6 max-w-7xl space-y-6">
-        {/* Header Section */}
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                {t('dashboard.welcomeBack')}, John!
-              </h1>
-              <p className="text-gray-600">{t('dashboard.overview')}</p>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-              <Calendar className="h-4 w-4" />
-              <span>
-                {t('dashboard.lastUpdated')}: {currentTime?.toLocaleTimeString("en-IN", { hour12: true })}
-              </span>
-            </div>
+    <div className="min-h-screen bg-cool-white/50 p-4 sm:p-6">
+      <div className="container mx-auto max-w-screen-2xl space-y-6">
+        
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-deep-black">
+              {t('dashboard.welcomeBack')}, {profile ? profile.fullName.split(' ')[0] : 'Farmer'}!
+            </h1>
+            <p className="text-muted-foreground">Here is your farm's health summary for today.</p>
           </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="outline" className="bg-white text-sm h-9"><Calendar className="h-4 w-4 mr-2" />{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</Button>
+            <Dialog><DialogTrigger asChild><Button className="bg-primary hover:bg-primary/90 h-9"><Plus className="h-4 w-4 mr-2" />Add Task</Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Add a New Task</DialogTitle></DialogHeader><div className="py-4"><Input placeholder="e.g., Check irrigation pump in Field C" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)}/></div><DialogFooter><DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose><DialogClose asChild><Button onClick={handleAddTask}>Add Task</Button></DialogClose></DialogFooter></DialogContent></Dialog>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-gray-600">Active Alerts</CardTitle></CardHeader><CardContent><p className="text-3xl font-bold">3 High Priority</p><p className="text-xs text-muted-foreground mt-1">Check Field B immediately</p></CardContent></Card>
+            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-gray-600">Avg. Soil Moisture (7d)</CardTitle></CardHeader><CardContent><p className="text-3xl font-bold">68.2%</p><ResponsiveContainer width="100%" height={40}><LineChart data={moistureData}><Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.5rem', fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} labelStyle={{ display: 'none' }} itemStyle={{ color: "#3b82f6" }}/><Line type="monotone" dataKey="value" stroke={"#3b82f6"} strokeWidth={2} dot={false} /></LineChart></ResponsiveContainer></CardContent></Card>
+            <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-gray-600">Tasks Progress</CardTitle></CardHeader><CardContent><p className="text-3xl font-bold">{completedTasksCount} / {totalTasksCount} Completed</p><Progress value={tasksProgress} className="mt-2 h-2" /></CardContent></Card>
         </div>
 
-        {/* Farm Overview Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="hover:shadow-md transition-all duration-200 border-l-4 border-l-green-500">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-600">{t('dashboard.farmSize')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{mockFarmData.totalArea} {t('dashboard.hectares')}</p>
-                  <p className="text-xs text-green-600">+2.5 {t('dashboard.thisMonth')}</p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Sprout className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-all duration-200 border-l-4 border-l-blue-500">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-600">{t('dashboard.activeFields')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{mockFarmData.activeFields}</p>
-                  <p className="text-xs text-blue-600">2 {t('dashboard.fieldsHarvesting')}</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <MapPin className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-all duration-200 border-l-4 border-l-purple-500">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-600">{t('dashboard.activeSensors')}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {mockFarmData.sensors.active}/{mockFarmData.sensors.total}
-                  </p>
-                  <p className="text-xs text-purple-600">3 {t('dashboard.sensorsOffline')}</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Activity className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-all duration-200 border-l-4 border-l-orange-500">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-600">{t('dashboard.currentCrops')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{mockFarmData.currentCrops.length}</p>
-                  <p className="text-xs text-orange-600">{t('dashboard.peakGrowingSeason')}</p>
-                </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Sprout className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Weather Card - Takes 2 columns on large screens */}
-          <Card className="lg:col-span-2 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <Cloud className="h-5 w-5 text-blue-600" />
-                {t('dashboard.weatherUpdate')}
-              </CardTitle>
-              <CardDescription>{t('dashboard.currentConditions')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Current Weather */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    {getWeatherIcon(mockWeatherData.current.condition)}
-                    <div>
-                      <p className="text-3xl font-bold text-gray-900">{mockWeatherData.current.temperature}°C</p>
-                      <p className="text-gray-600">{mockWeatherData.current.condition}</p>
-                    </div>
-                  </div>
-                  <div className="text-right space-y-2">
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                      <Droplets className="h-4 w-4" />
-                      <span>{mockWeatherData.current.humidity}%</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                      <Wind className="h-4 w-4" />
-                      <span>{mockWeatherData.current.windSpeed} km/h</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 5-Day Forecast */}
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-3">{t('dashboard.fiveDayForecast')}</h4>
-                <div className="grid grid-cols-5 gap-2">
-                  {mockWeatherData.forecast.map((day, index) => (
-                    <div key={index} className="text-center p-3 rounded-lg hover:bg-gray-50 border transition-colors">
-                      <p className="text-sm font-medium text-gray-900 mb-2">{day.day}</p>
-                      <div className="flex justify-center mb-2">
-                        {getWeatherIcon(day.condition)}
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        {day.high}°/{day.low}°
-                      </p>
-                      <p className="text-xs text-blue-600">{day.rain}%</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Sensor Readings */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5 text-green-600" />
-                {t('dashboard.liveSensorData')}
-              </CardTitle>
-              <CardDescription>{t('dashboard.latestIoTReadings')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {mockSensorData.map((sensor, index) => (
-                <div key={index} className={`p-3 rounded-lg border ${getStatusColor(sensor.status)} transition-all`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">{t(sensor.name)}</span>
-                    {getTrendIcon(sensor.trend)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold">
-                      {sensor.value} {sensor.unit}
-                    </span>
-                    <Badge variant="outline" className="text-xs">
-                      {t(`dashboard.status.${sensor.status}`)}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-              <Button variant="outline" className="w-full mt-4" asChild>
-                <Link href="/sensors">
-                  <Eye className="h-4 w-4 mr-2" />
-                  {t('dashboard.viewAllSensors')}
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Alerts and Quick Actions */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Alerts Card */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                {t('dashboard.recentAlerts')}
-              </CardTitle>
-              <CardDescription>{t('dashboard.importantNotifications')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {mockFarmData.alerts.map((alert) => (
-                <div key={alert.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border hover:bg-gray-100 transition-colors">
-                  {getAlertIcon(alert.type)}
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{t(alert.message)}</p>
-                    <p className="text-xs text-gray-500">{alert.time}</p>
-                  </div>
-                </div>
-              ))}
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/alerts">
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  {t('dashboard.viewAllAlerts')}
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-purple-600" />
-                {t('dashboard.quickActions')}
-              </CardTitle>
-              <CardDescription>{t('dashboard.commonTasks')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="h-20 flex flex-col gap-2 hover:bg-green-50 hover:border-green-300" asChild>
-                  <Link href="/crop-recommendations">
-                    <Sprout className="h-6 w-6 text-green-600" />
-                    <span className="text-sm text-center">{t('nav.recommendations')}</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2 hover:bg-blue-50 hover:border-blue-300" asChild>
-                  <Link href="/pest-detection">
-                    <Camera className="h-6 w-6 text-blue-600" />
-                    <span className="text-sm text-center">{t('nav.pest-detection')}</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2 hover:bg-purple-50 hover:border-purple-300" asChild>
-                  <Link href="/chat">
-                    <MessageSquare className="h-6 w-6 text-purple-600" />
-                    <span className="text-sm text-center">{t('nav.chat')}</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-20 flex flex-col gap-2 hover:bg-orange-50 hover:border-orange-300" asChild>
-                  <Link href="/analytics">
-                    <BarChart3 className="h-6 w-6 text-orange-600" />
-                    <span className="text-sm text-center">{t('nav.analytics')}</span>
-                  </Link>
-                </Button>
-              </div>
-
-              <Separator />
-
-              <Button className="w-full bg-green-600 hover:bg-green-700" asChild>
-                <Link href="/farms/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('farm.addNew')}
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Crop Management Section */}
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2">
-              <Sprout className="h-5 w-5 text-green-600" />
-              {t('dashboard.cropManagement')}
-            </CardTitle>
-            <CardDescription>{t('dashboard.currentCropsOverview')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockFarmData.currentCrops.map((crop, index) => (
-                <div key={index} className="p-4 rounded-lg border bg-gradient-to-br from-green-50 to-blue-50 hover:shadow-sm transition-all">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-gray-900">{crop}</h3>
-                    <Sprout className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">{t('dashboard.growthProgress')}</span>
-                      <span className="font-medium">{65 + index * 5}%</span>
-                    </div>
-                    <Progress value={65 + index * 5} className="h-2" />
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>{t('dashboard.field')} {String.fromCharCode(65 + index)}</span>
-                      <span>{2.5 + index * 0.5} {t('dashboard.hectares')}</span>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {t('dashboard.estHarvest')}: {new Date(Date.now() + (30 - index * 5) * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+                <Card><CardHeader><CardTitle className="flex items-center gap-2"><Map className="h-5 w-5 text-primary"/> Farm Layout</CardTitle><CardDescription>A visual overview of your fields and their current status.</CardDescription></CardHeader><CardContent className="grid grid-cols-2 gap-4">{mockFarmLayout.map(field => (<div key={field.id} className={`p-4 rounded-lg border-2 ${field.alert ? 'border-red-500 bg-red-50 animate-pulse' : 'border-gray-200 bg-gray-50'}`}><div className="flex justify-between items-center"><p className="font-bold text-lg">Field {field.id}</p><Badge variant={field.status === 'good' ? 'default' : field.status === 'warning' ? 'destructive' : 'secondary'}>{field.status}</Badge></div><p className="text-muted-foreground">{field.crop}</p></div>))}</CardContent></Card>
+                <Card><CardHeader className="flex flex-row items-center justify-between"><div><CardTitle className="flex items-center gap-2"><ListTodo className="h-5 w-5 text-primary"/> Today's Checklist</CardTitle><CardDescription>Your daily plan for managing farm activities.</CardDescription></div><Button variant="outline" size="sm" onClick={handleClearCompleted}><Trash2 className="h-4 w-4 mr-2"/>Clear Completed</Button></CardHeader><CardContent className="space-y-3">{tasks.length > 0 ? tasks.map(task => (<div key={task.id} className={`flex items-center gap-3 p-3 rounded-lg border-l-4 transition-colors ${getPriorityColor(task.priority)} ${task.completed ? 'bg-gray-100' : 'bg-white'}`}><Checkbox id={`task-${task.id}`} checked={task.completed} onCheckedChange={() => handleTaskToggle(task.id)} /><label htmlFor={`task-${task.id}`} className={`flex-1 text-sm ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.text}</label><Badge variant={task.priority === 'high' ? 'destructive' : task.priority === 'medium' ? 'secondary' : 'outline'}>{task.priority}</Badge></div>)) : <p className="text-sm text-muted-foreground text-center py-4">No tasks for today. Well done!</p>}</CardContent></Card>
             </div>
-          </CardContent>
-        </Card>
+            <div className="space-y-6">
+                <Card className="overflow-hidden">
+                    <CardHeader><CardTitle className="flex items-center gap-2"><Cloud className="h-5 w-5 text-primary"/> Weather in {profile?.city || 'your city'}</CardTitle></CardHeader>
+                    {weatherLoading ? (<div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary"/></div>) : weatherData ? (<>
+                        <div className="p-6 bg-gradient-to-br from-blue-100 to-green-100">
+                          <div className="flex items-center justify-between">
+                            <div><p className="text-muted-foreground">Current Weather</p><p className="text-4xl font-bold text-deep-black">{weatherData.current.temp}°C</p><p className="font-medium">{weatherData.current.condition}</p></div>
+                            {getWeatherIcon(weatherData.current.condition, 'h-16 w-16')}
+                          </div>
+                          <div className="flex justify-between text-sm mt-4"><span>Feels like: {weatherData.current.feelsLike}°</span><span>Humidity: {weatherData.current.humidity}%</span></div>
+                        </div>
+                        <CardContent className="p-6 space-y-3">
+                            <h3 className="text-sm font-medium mb-2">5-Day Forecast</h3>
+                            {weatherData.forecast.map(day => (<div key={day.day} className="flex items-center justify-between text-sm"><span className="font-medium w-12 text-muted-foreground">{day.day}</span>{getWeatherIcon(day.condition, 'h-5 w-5')}<span className="font-bold">{day.high}° <span className="text-muted-foreground">/ {day.low}°</span></span></div>))}
+                        </CardContent>
+                      </>) : (<div className="flex items-center justify-center h-64 text-red-500"><AlertTriangle className="h-6 w-6 mr-2"/> Could not load weather.</div>)}
+                </Card>
+                <Card><CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-primary"/> Live Market Prices</CardTitle></CardHeader><CardContent className="space-y-3">{mockMarketPrices.map(crop => (<div key={crop.crop} className="flex items-center justify-between"><span className="font-medium">{crop.crop}</span><span className={`font-bold ${crop.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>₹{crop.price.toLocaleString('en-IN')}</span></div>))}</CardContent></Card>
+            </div>
+        </div>
+        <Card><CardHeader><CardTitle className="flex items-center gap-2"><Leaf className="h-5 w-5 text-primary"/> Crop Health Overview</CardTitle></CardHeader><CardContent><div className="grid md:grid-cols-3 gap-6">{mockCropOverview.map(crop => (<div key={crop.name} className="p-4 border rounded-lg space-y-3"><div className="flex justify-between items-center"><h3 className="font-bold text-lg">{crop.name}</h3><Badge variant="outline">{crop.field}</Badge></div><div><div className="flex justify-between text-sm mb-1"><span>Health Score</span><span className="font-medium">{crop.health}%</span></div><Progress value={crop.health} /></div><div className="text-sm flex justify-between"><span className="text-muted-foreground">Growth Stage:</span><span className="font-medium">{crop.stage}</span></div><div className="text-sm flex justify-between"><span className="text-muted-foreground">Est. Harvest:</span><span className="font-medium">{crop.estHarvest}</span></div></div>))}</div></CardContent></Card>
       </div>
     </div>
   )
