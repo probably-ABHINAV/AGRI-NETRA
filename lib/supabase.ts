@@ -22,6 +22,46 @@ export const isSupabaseConfigured = () => {
 // Create a default instance for server-side use
 export const supabase = createClient()
 
+// Server-side authentication helpers
+export async function getAuthenticatedUser(request: Request) {
+  if (!supabase) {
+    return null
+  }
+
+  try {
+    // Extract the authorization header
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return null
+    }
+
+    const token = authHeader.split(' ')[1]
+    if (!token) {
+      return null
+    }
+
+    // Verify the JWT token and get user
+    const { data: { user }, error } = await supabase.auth.getUser(token)
+    
+    if (error || !user) {
+      return null
+    }
+
+    return user
+  } catch (error) {
+    console.error('Authentication error:', error)
+    return null
+  }
+}
+
+export async function requireAuthentication(request: Request) {
+  const user = await getAuthenticatedUser(request)
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+  return user
+}
+
 // Database types based on your schema
 export interface Profile {
   id: string

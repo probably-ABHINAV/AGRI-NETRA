@@ -9,7 +9,8 @@ INSERT INTO regions (name, state, country, climate_zone, avg_rainfall, soil_type
 ('Karnataka Plateau', 'Karnataka', 'India', 'Tropical', 600, 'Red soil'),
 ('West Bengal Delta', 'West Bengal', 'India', 'Tropical', 1500, 'Alluvial'),
 ('Rajasthan Desert', 'Rajasthan', 'India', 'Arid', 300, 'Sandy'),
-('Kerala Coast', 'Kerala', 'India', 'Tropical', 2500, 'Laterite');
+('Kerala Coast', 'Kerala', 'India', 'Tropical', 2500, 'Laterite')
+ON CONFLICT (name, state) DO NOTHING;
 
 -- Insert sample crops
 INSERT INTO crops (name, scientific_name, category, growing_season, water_requirement, soil_ph_min, soil_ph_max, temperature_min, temperature_max, growth_duration_days, description) VALUES
@@ -53,4 +54,5 @@ INSERT INTO crops (name, scientific_name, category, growing_season, water_requir
 ('Cotton', 'Gossypium hirsutum', 'cash_crops', 'Kharif', 'Medium', 5.8, 8.0, 21, 30, 180, 'Major fiber crop for textile industry'),
 ('Sugarcane', 'Saccharum officinarum', 'cash_crops', 'Year-round', 'High', 6.0, 7.5, 26, 32, 365, 'Sugar producing perennial crop'),
 ('Tea', 'Camellia sinensis', 'cash_crops', 'Perennial', 'High', 4.5, 6.0, 20, 30, 365, 'Beverage crop for hilly regions'),
-('Coffee', 'Coffea arabica', 'cash_crops', 'Perennial', 'High', 6.0, 7.0, 15, 25, 365, 'Beverage crop for tropical highlands');
+('Coffee', 'Coffea arabica', 'cash_crops', 'Perennial', 'High', 6.0, 7.0, 15, 25, 365, 'Beverage crop for tropical highlands')
+ON CONFLICT (name, scientific_name) DO NOTHING;

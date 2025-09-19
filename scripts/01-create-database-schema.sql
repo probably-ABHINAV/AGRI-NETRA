@@ -6,19 +6,35 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- User roles enum
-CREATE TYPE user_role AS ENUM ('farmer', 'expert', 'admin');
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('farmer', 'expert', 'admin');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Crop categories enum
-CREATE TYPE crop_category AS ENUM ('cereals', 'pulses', 'oilseeds', 'vegetables', 'fruits', 'spices', 'cash_crops');
+DO $$ BEGIN
+    CREATE TYPE crop_category AS ENUM ('cereals', 'pulses', 'oilseeds', 'vegetables', 'fruits', 'spices', 'cash_crops');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Sensor types enum
-CREATE TYPE sensor_type AS ENUM ('soil_moisture', 'temperature', 'humidity', 'ph', 'nitrogen', 'phosphorus', 'potassium');
+DO $$ BEGIN
+    CREATE TYPE sensor_type AS ENUM ('soil_moisture', 'temperature', 'humidity', 'ph', 'nitrogen', 'phosphorus', 'potassium');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Alert severity enum
-CREATE TYPE alert_severity AS ENUM ('low', 'medium', 'high', 'critical');
+DO $$ BEGIN
+    CREATE TYPE alert_severity AS ENUM ('low', 'medium', 'high', 'critical');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Users table (extends Supabase auth.users)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id UUID REFERENCES auth.users(id) PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     full_name TEXT NOT NULL,
@@ -29,13 +45,14 @@ CREATE TABLE profiles (
     experience_years INTEGER,
     preferred_language TEXT DEFAULT 'en',
     avatar_url TEXT,
+    password_hash TEXT,
     is_verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Regions table
-CREATE TABLE regions (
+CREATE TABLE IF NOT EXISTS regions (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name TEXT NOT NULL,
     state TEXT NOT NULL,
@@ -44,11 +61,12 @@ CREATE TABLE regions (
     avg_rainfall DECIMAL,
     soil_type TEXT,
     coordinates POINT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(name, state)
 );
 
 -- Crops table
-CREATE TABLE crops (
+CREATE TABLE IF NOT EXISTS crops (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name TEXT NOT NULL,
     scientific_name TEXT,
@@ -62,11 +80,12 @@ CREATE TABLE crops (
     growth_duration_days INTEGER,
     description TEXT,
     image_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(name, scientific_name)
 );
 
 -- Farms table
-CREATE TABLE farms (
+CREATE TABLE IF NOT EXISTS farms (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
@@ -81,7 +100,7 @@ CREATE TABLE farms (
 );
 
 -- Crop recommendations table
-CREATE TABLE crop_recommendations (
+CREATE TABLE IF NOT EXISTS crop_recommendations (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     farm_id UUID REFERENCES farms(id) ON DELETE CASCADE,
@@ -96,7 +115,7 @@ CREATE TABLE crop_recommendations (
 );
 
 -- IoT sensors table
-CREATE TABLE sensors (
+CREATE TABLE IF NOT EXISTS sensors (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     farm_id UUID REFERENCES farms(id) ON DELETE CASCADE,
     sensor_type sensor_type NOT NULL,
@@ -109,7 +128,7 @@ CREATE TABLE sensors (
 );
 
 -- Sensor readings table
-CREATE TABLE sensor_readings (
+CREATE TABLE IF NOT EXISTS sensor_readings (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     sensor_id UUID REFERENCES sensors(id) ON DELETE CASCADE,
     value DECIMAL NOT NULL,
@@ -119,7 +138,7 @@ CREATE TABLE sensor_readings (
 );
 
 -- Weather data table
-CREATE TABLE weather_data (
+CREATE TABLE IF NOT EXISTS weather_data (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     region_id UUID REFERENCES regions(id),
     date DATE NOT NULL,
@@ -136,7 +155,7 @@ CREATE TABLE weather_data (
 );
 
 -- Pest and disease detection table
-CREATE TABLE pest_detections (
+CREATE TABLE IF NOT EXISTS pest_detections (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     farm_id UUID REFERENCES farms(id) ON DELETE CASCADE,
@@ -151,7 +170,7 @@ CREATE TABLE pest_detections (
 );
 
 -- Expert consultations table
-CREATE TABLE consultations (
+CREATE TABLE IF NOT EXISTS consultations (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     farmer_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     expert_id UUID REFERENCES profiles(id),
@@ -166,7 +185,7 @@ CREATE TABLE consultations (
 );
 
 -- Consultation messages table
-CREATE TABLE consultation_messages (
+CREATE TABLE IF NOT EXISTS consultation_messages (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     consultation_id UUID REFERENCES consultations(id) ON DELETE CASCADE,
     sender_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
@@ -177,7 +196,7 @@ CREATE TABLE consultation_messages (
 );
 
 -- Alerts table
-CREATE TABLE alerts (
+CREATE TABLE IF NOT EXISTS alerts (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     farm_id UUID REFERENCES farms(id) ON DELETE CASCADE,
@@ -192,7 +211,7 @@ CREATE TABLE alerts (
 );
 
 -- Analytics events table
-CREATE TABLE analytics_events (
+CREATE TABLE IF NOT EXISTS analytics_events (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     event_type TEXT NOT NULL,
@@ -204,25 +223,25 @@ CREATE TABLE analytics_events (
 );
 
 -- Create indexes for better performance
-CREATE INDEX idx_profiles_role ON profiles(role);
-CREATE INDEX idx_profiles_location ON profiles(location);
-CREATE INDEX idx_farms_user_id ON farms(user_id);
-CREATE INDEX idx_farms_region_id ON farms(region_id);
-CREATE INDEX idx_crop_recommendations_user_id ON crop_recommendations(user_id);
-CREATE INDEX idx_crop_recommendations_created_at ON crop_recommendations(created_at);
-CREATE INDEX idx_sensor_readings_sensor_id ON sensor_readings(sensor_id);
-CREATE INDEX idx_sensor_readings_timestamp ON sensor_readings(timestamp);
-CREATE INDEX idx_weather_data_region_date ON weather_data(region_id, date);
-CREATE INDEX idx_pest_detections_user_id ON pest_detections(user_id);
-CREATE INDEX idx_pest_detections_created_at ON pest_detections(created_at);
-CREATE INDEX idx_consultations_farmer_id ON consultations(farmer_id);
-CREATE INDEX idx_consultations_expert_id ON consultations(expert_id);
-CREATE INDEX idx_consultations_status ON consultations(status);
-CREATE INDEX idx_consultation_messages_consultation_id ON consultation_messages(consultation_id);
-CREATE INDEX idx_alerts_user_id ON alerts(user_id);
-CREATE INDEX idx_alerts_is_read ON alerts(is_read);
-CREATE INDEX idx_analytics_events_user_id ON analytics_events(user_id);
-CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
+CREATE INDEX IF NOT EXISTS idx_profiles_location ON profiles(location);
+CREATE INDEX IF NOT EXISTS idx_farms_user_id ON farms(user_id);
+CREATE INDEX IF NOT EXISTS idx_farms_region_id ON farms(region_id);
+CREATE INDEX IF NOT EXISTS idx_crop_recommendations_user_id ON crop_recommendations(user_id);
+CREATE INDEX IF NOT EXISTS idx_crop_recommendations_created_at ON crop_recommendations(created_at);
+CREATE INDEX IF NOT EXISTS idx_sensor_readings_sensor_id ON sensor_readings(sensor_id);
+CREATE INDEX IF NOT EXISTS idx_sensor_readings_timestamp ON sensor_readings(timestamp);
+CREATE INDEX IF NOT EXISTS idx_weather_data_region_date ON weather_data(region_id, date);
+CREATE INDEX IF NOT EXISTS idx_pest_detections_user_id ON pest_detections(user_id);
+CREATE INDEX IF NOT EXISTS idx_pest_detections_created_at ON pest_detections(created_at);
+CREATE INDEX IF NOT EXISTS idx_consultations_farmer_id ON consultations(farmer_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_expert_id ON consultations(expert_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_status ON consultations(status);
+CREATE INDEX IF NOT EXISTS idx_consultation_messages_consultation_id ON consultation_messages(consultation_id);
+CREATE INDEX IF NOT EXISTS idx_alerts_user_id ON alerts(user_id);
+CREATE INDEX IF NOT EXISTS idx_alerts_is_read ON alerts(is_read);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_user_id ON analytics_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON analytics_events(created_at);
 
 -- Enable Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -238,64 +257,159 @@ ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 -- Profiles: Users can view and update their own profile
-CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+DO $$ BEGIN
+    CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Farms: Users can manage their own farms
-CREATE POLICY "Users can view own farms" ON farms FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own farms" ON farms FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own farms" ON farms FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete own farms" ON farms FOR DELETE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    CREATE POLICY "Users can view own farms" ON farms FOR SELECT USING (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can insert own farms" ON farms FOR INSERT WITH CHECK (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can update own farms" ON farms FOR UPDATE USING (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can delete own farms" ON farms FOR DELETE USING (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Crop recommendations: Users can view their own recommendations
-CREATE POLICY "Users can view own recommendations" ON crop_recommendations FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own recommendations" ON crop_recommendations FOR INSERT WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+    CREATE POLICY "Users can view own recommendations" ON crop_recommendations FOR SELECT USING (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can insert own recommendations" ON crop_recommendations FOR INSERT WITH CHECK (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Sensors: Users can manage sensors on their farms
-CREATE POLICY "Users can view own farm sensors" ON sensors FOR SELECT USING (
-    EXISTS (SELECT 1 FROM farms WHERE farms.id = sensors.farm_id AND farms.user_id = auth.uid())
-);
-CREATE POLICY "Users can insert own farm sensors" ON sensors FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM farms WHERE farms.id = sensors.farm_id AND farms.user_id = auth.uid())
-);
+DO $$ BEGIN
+    CREATE POLICY "Users can view own farm sensors" ON sensors FOR SELECT USING (
+        EXISTS (SELECT 1 FROM farms WHERE farms.id = sensors.farm_id AND farms.user_id = auth.uid())
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can insert own farm sensors" ON sensors FOR INSERT WITH CHECK (
+        EXISTS (SELECT 1 FROM farms WHERE farms.id = sensors.farm_id AND farms.user_id = auth.uid())
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Sensor readings: Users can view readings from their sensors
-CREATE POLICY "Users can view own sensor readings" ON sensor_readings FOR SELECT USING (
-    EXISTS (
-        SELECT 1 FROM sensors 
-        JOIN farms ON farms.id = sensors.farm_id 
-        WHERE sensors.id = sensor_readings.sensor_id AND farms.user_id = auth.uid()
-    )
-);
+DO $$ BEGIN
+    CREATE POLICY "Users can view own sensor readings" ON sensor_readings FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM sensors 
+            JOIN farms ON farms.id = sensors.farm_id 
+            WHERE sensors.id = sensor_readings.sensor_id AND farms.user_id = auth.uid()
+        )
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Pest detections: Users can manage their own detections
-CREATE POLICY "Users can view own pest detections" ON pest_detections FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own pest detections" ON pest_detections FOR INSERT WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+    CREATE POLICY "Users can view own pest detections" ON pest_detections FOR SELECT USING (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can insert own pest detections" ON pest_detections FOR INSERT WITH CHECK (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Consultations: Farmers can view their consultations, experts can view assigned consultations
-CREATE POLICY "Farmers can view own consultations" ON consultations FOR SELECT USING (auth.uid() = farmer_id);
-CREATE POLICY "Experts can view assigned consultations" ON consultations FOR SELECT USING (auth.uid() = expert_id);
-CREATE POLICY "Farmers can insert consultations" ON consultations FOR INSERT WITH CHECK (auth.uid() = farmer_id);
+DO $$ BEGIN
+    CREATE POLICY "Farmers can view own consultations" ON consultations FOR SELECT USING (auth.uid() = farmer_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Experts can view assigned consultations" ON consultations FOR SELECT USING (auth.uid() = expert_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Farmers can insert consultations" ON consultations FOR INSERT WITH CHECK (auth.uid() = farmer_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Consultation messages: Participants can view and send messages
-CREATE POLICY "Consultation participants can view messages" ON consultation_messages FOR SELECT USING (
-    EXISTS (
-        SELECT 1 FROM consultations 
-        WHERE consultations.id = consultation_messages.consultation_id 
-        AND (consultations.farmer_id = auth.uid() OR consultations.expert_id = auth.uid())
-    )
-);
-CREATE POLICY "Consultation participants can send messages" ON consultation_messages FOR INSERT WITH CHECK (
-    EXISTS (
-        SELECT 1 FROM consultations 
-        WHERE consultations.id = consultation_messages.consultation_id 
-        AND (consultations.farmer_id = auth.uid() OR consultations.expert_id = auth.uid())
-    ) AND auth.uid() = sender_id
-);
+DO $$ BEGIN
+    CREATE POLICY "Consultation participants can view messages" ON consultation_messages FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM consultations 
+            WHERE consultations.id = consultation_messages.consultation_id 
+            AND (consultations.farmer_id = auth.uid() OR consultations.expert_id = auth.uid())
+        )
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Consultation participants can send messages" ON consultation_messages FOR INSERT WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM consultations 
+            WHERE consultations.id = consultation_messages.consultation_id 
+            AND (consultations.farmer_id = auth.uid() OR consultations.expert_id = auth.uid())
+        ) AND auth.uid() = sender_id
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Alerts: Users can view their own alerts
-CREATE POLICY "Users can view own alerts" ON alerts FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can update own alerts" ON alerts FOR UPDATE USING (auth.uid() = user_id);
+DO $$ BEGIN
+    CREATE POLICY "Users can view own alerts" ON alerts FOR SELECT USING (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Users can update own alerts" ON alerts FOR UPDATE USING (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Analytics: Users can insert their own events
-CREATE POLICY "Users can insert own analytics" ON analytics_events FOR INSERT WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+    CREATE POLICY "Users can insert own analytics" ON analytics_events FOR INSERT WITH CHECK (auth.uid() = user_id);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;

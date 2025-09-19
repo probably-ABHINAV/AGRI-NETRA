@@ -1,7 +1,6 @@
 // Database operations with Supabase integration
 import { supabase, isSupabaseConfigured } from './supabase'
 import type { Profile, Farm, Crop } from './supabase'
-import type { Database } from '@/types'
 
 export interface User {
   id: string
@@ -55,13 +54,13 @@ export const db = {
 
       const { data, error } = await supabase
         .from('profiles')
-        .insert([{
+        .insert({
           email: userData.email,
           full_name: userData.full_name,
           role: userData.role,
           location: userData.location,
           phone: userData.phone
-        }])
+        })
         .select()
         .single()
 
@@ -141,14 +140,14 @@ export const db = {
 
       const { data, error } = await supabase
         .from('farms')
-        .insert([{
+        .insert({
           user_id: farmData.ownerId,
           name: farmData.name,
           location: farmData.location,
           area_hectares: farmData.size,
           soil_type: farmData.soilType,
           irrigation_type: farmData.irrigationType
-        }])
+        })
         .select()
         .single()
 
@@ -341,7 +340,7 @@ export const db = {
 
       const { data, error } = await supabase
         .from('farm_crops')
-        .insert([cropData])
+        .insert(cropData)
         .select()
         .single()
 
@@ -394,7 +393,7 @@ export const db = {
 
       const { data, error } = await supabase
         .from('crop_recommendations')
-        .insert([recData])
+        .insert(recData)
         .select()
         .single()
 
@@ -418,7 +417,7 @@ export const db = {
       }
 
       const { data, error } = await supabase
-        .from('pest_alerts')
+        .from('pest_detections')
         .select('*')
         .eq('farm_id', farmId)
 
@@ -430,14 +429,14 @@ export const db = {
     }
   },
 
-  async createPestAlert(alertData: any): Promise<any> {
+  async createPestDetection(detectionData: any): Promise<any> {
     if (!isSupabaseConfigured()) {
-      const newAlert = {
-        id: `alert-${Date.now()}`,
-        ...alertData,
+      const newDetection = {
+        id: `detection-${Date.now()}`,
+        ...detectionData,
         created_at: new Date().toISOString()
       }
-      return newAlert
+      return newDetection
     }
 
     try {
@@ -446,16 +445,162 @@ export const db = {
       }
 
       const { data, error } = await supabase
-        .from('pest_alerts')
-        .insert([alertData])
+        .from('pest_detections')
+        .insert(detectionData)
         .select()
         .single()
 
       if (error) throw error
       return data
     } catch (error) {
-      console.error('Error creating pest alert:', error)
+      console.error('Error creating pest detection:', error)
       throw error
+    }
+  },
+
+  // Analytics operations
+  async createAnalyticsEvent(eventData: {
+    user_id: string
+    event_type: string
+    event_data?: any
+    session_id?: string
+    ip_address?: string
+    user_agent?: string
+  }): Promise<any> {
+    if (!isSupabaseConfigured()) {
+      const newEvent = {
+        id: `analytics-${Date.now()}`,
+        ...eventData,
+        created_at: new Date().toISOString()
+      }
+      return newEvent
+    }
+
+    try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { data, error } = await supabase
+        .from('analytics_events')
+        .insert(eventData)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error creating analytics event:', error)
+      throw error
+    }
+  },
+
+  async getAnalyticsEvents(userId: string, limit: number = 100): Promise<any[]> {
+    if (!isSupabaseConfigured()) {
+      return []
+    }
+
+    try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { data, error } = await supabase
+        .from('analytics_events')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error fetching analytics events:', error)
+      return []
+    }
+  },
+
+  // Chat history operations
+  async createChatMessage(messageData: {
+    consultation_id?: string
+    sender_id: string
+    message: string
+    attachments?: any
+    is_ai_response: boolean
+  }): Promise<any> {
+    if (!isSupabaseConfigured()) {
+      const newMessage = {
+        id: `msg-${Date.now()}`,
+        ...messageData,
+        created_at: new Date().toISOString()
+      }
+      return newMessage
+    }
+
+    try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { data, error } = await supabase
+        .from('consultation_messages')
+        .insert(messageData)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error creating chat message:', error)
+      throw error
+    }
+  },
+
+  async getChatHistory(consultationId: string): Promise<any[]> {
+    if (!isSupabaseConfigured()) {
+      return []
+    }
+
+    try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { data, error } = await supabase
+        .from('consultation_messages')
+        .select('*')
+        .eq('consultation_id', consultationId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error fetching chat history:', error)
+      return []
+    }
+  },
+
+  async getUserChatSessions(userId: string): Promise<any[]> {
+    if (!isSupabaseConfigured()) {
+      return []
+    }
+
+    try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+
+      const { data, error } = await supabase
+        .from('consultations')
+        .select('*')
+        .eq('farmer_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error fetching user chat sessions:', error)
+      return []
     }
   }
 }

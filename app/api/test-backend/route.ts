@@ -1,19 +1,12 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getUser } from "@/lib/auth"
-import { H } from '@highlight-run/next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { getUser } from '@/lib/auth'
+import { H } from '@highlight-run/next/server'
 
 export async function GET(request: NextRequest) {
+  const { span } = H.startWithHeaders('test-backend', {})
+
   try {
-    console.info('🚀 API Route: /api/test-backend called')
-    
-    // Track the API call with Highlight
-    H.track('API Call', {
-      endpoint: '/api/test-backend',
-      method: 'GET',
-      timestamp: new Date().toISOString()
-    });
-    
-    // Test authentication
+    // Get current user session
     const user = await getUser()
 
     // Test database operations
@@ -49,8 +42,8 @@ export async function GET(request: NextRequest) {
         highlight: "✅ Enabled",
         opentelemetry: "✅ Enabled"
       },
-      ...testData, // Corrected spread syntax
-      meta: { // Added meta object for additional data
+      ...testData,
+      meta: {
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
         version: '1.0.0'
@@ -59,16 +52,18 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Backend test failed:', error)
-    
+
     // Track error with Highlight
     H.consumeError(error as Error, {
       category: 'API',
       level: 'error'
     });
-    
+
     return NextResponse.json(
       { status: 'error', message: 'Backend test failed' },
       { status: 500 }
     )
+  } finally {
+    span.end()
   }
 }

@@ -24,39 +24,11 @@ const openSans = Open_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "AgriNetra - Premium Smart Crop Advisory System",
-  description:
-    "World-class AI-powered crop recommendations, pest detection, and smart farming solutions for modern agriculture. Transform your farming with cutting-edge technology.",
-  generator: "AgriNetra",
-  keywords: [
-    "agriculture",
-    "farming",
-    "AI",
-    "crop advisory",
-    "smart farming",
-    "pest detection",
-    "IoT sensors",
-    "precision agriculture",
-    "sustainable farming",
-    "agricultural technology",
-  ],
-  authors: [{ name: "AgriNetra Team" }],
-  creator: "AgriNetra",
-  publisher: "AgriNetra",
-  robots: "index, follow",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://agrinetra.com",
-    title: "AgriNetra - Premium Smart Crop Advisory System",
-    description: "Transform your farming with world-class AI-powered agricultural solutions",
-    siteName: "AgriNetra",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AgriNetra - Premium Smart Crop Advisory System",
-    description: "Transform your farming with world-class AI-powered agricultural solutions",
-  },
+  title: "AgriNetra - Smart Crop Advisory System",
+  description: "AI-powered agricultural guidance for farmers",
+  icons: {
+    icon: '/placeholder-logo.png'
+  }
 }
 
 export default function RootLayout({

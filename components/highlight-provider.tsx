@@ -1,32 +1,32 @@
+'use client'
 
-'use client';
+import { HighlightInit } from '@highlight-run/next/client'
+import { ErrorBoundary } from './error-boundary'
 
-import { HighlightInit } from '@highlight-run/next/client';
-import { useEffect } from 'react';
-
-export default function HighlightProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    // Additional client-side initialization if needed
-    console.log('Highlight.io initialized on client');
-  }, []);
-
+export default function HighlightProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <>
+    <ErrorBoundary>
       <HighlightInit
-        projectId={'ney010xd'}
+        projectId={process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID || 'ney010xd'}
         serviceName="agri-netra-frontend"
-        tracingOrigins={['localhost', '0.0.0.0', /.*\.repl\.co$/]}
+        tracingOrigins={['localhost', '0.0.0.0', /.+/]}
         networkRecording={{
           enabled: true,
           recordHeadersAndBody: true,
-          urlBlocklist: [/.*\.css/, /.*\.js/, /.*\.png/, /.*\.jpg/, /.*\.svg/],
+          urlBlocklist: [
+            // Add URLs you don't want to record here
+          ],
         }}
         enableCanvasRecording={true}
         enablePerformanceRecording={true}
-        debug={true}
+        debug={process.env.NODE_ENV === 'development'}
         manualStart={false}
       />
       {children}
-    </>
-  );
+    </ErrorBoundary>
+  )
 }

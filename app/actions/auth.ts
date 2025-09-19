@@ -1,7 +1,8 @@
+
 'use server';
 
 import { redirect } from 'next/navigation'
-import { login, logout } from '@/lib/auth'
+import { login, register } from '@/lib/auth'
 
 export async function loginAction(formData: FormData) {
   try {
@@ -26,6 +27,7 @@ export async function loginAction(formData: FormData) {
 
 export async function logoutAction() {
   try {
+    const { logout } = await import('@/lib/auth')
     await logout()
     redirect('/')
   } catch (error) {
@@ -39,9 +41,12 @@ export async function registerAction(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const name = formData.get('name') as string
+    const phone = formData.get('phoneNumber') as string
+    const role = formData.get('role') as string
+    const state = formData.get('state') as string
 
     if (!email || !password || !name) {
-      throw new Error('All fields are required')
+      throw new Error('Email, password, and name are required')
     }
 
     if (!email.includes('@')) {
@@ -56,8 +61,15 @@ export async function registerAction(formData: FormData) {
       throw new Error('Name must be at least 2 characters')
     }
 
-    // Mock registration - in production, save to database
-    console.log('Registering user:', { email, name })
+    // Register user in database
+    await register({
+      email,
+      password,
+      fullName: name,
+      phone: phone || undefined,
+      role: role || 'farmer',
+      state: state || undefined
+    })
 
     redirect('/auth/login?message=Registration successful! Please login.')
   } catch (error) {

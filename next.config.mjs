@@ -14,8 +14,15 @@ const nextConfig = {
     allowedRevalidateHeaderKeys: [],
   },
   // Allow Replit origins for development
-  allowedDevOrigins: ['*.repl.co', '*.replit.dev', '127.0.0.1'],
+  allowedDevOrigins: ['*.repl.co', '*.replit.dev', '127.0.0.1', '*.sisko.replit.dev'],
   // Configure for Replit environment
+  webpack: (config, { isServer }) => {
+    // Reduce webpack cache warnings
+    if (!isServer) {
+      config.optimization.splitChunks.cacheGroups.default.minSize = 0;
+    }
+    return config;
+  },
   async rewrites() {
     return [];
   },
