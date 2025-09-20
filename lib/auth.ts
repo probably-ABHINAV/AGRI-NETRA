@@ -37,18 +37,61 @@ export async function decrypt(session: string): Promise<SessionPayload | null> {
 
 // Auth utility functions for server-side operations
 
-// Simple login function (placeholder)
-export async function login(email: string, password: string) {
-  // This is a placeholder - implement actual login logic
+// Simple login function 
+export async function login(formData: FormData) {
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  
   console.log('Login attempt for:', email)
-  return { success: false, error: 'Login not implemented' }
+  
+  // Demo login - check against demo credentials
+  const demoCredentials = [
+    { email: 'farmer@example.com', password: 'password123', userType: 'farmer' as const },
+    { email: 'expert@example.com', password: 'password123', userType: 'expert' as const },
+    { email: 'admin@example.com', password: 'password123', userType: 'admin' as const }
+  ]
+  
+  const user = demoCredentials.find(cred => cred.email === email && cred.password === password)
+  
+  if (user) {
+    // Create session for demo user
+    await createSession(user.email, user.email, user.userType)
+    return { success: true }
+  }
+  
+  throw new Error('Invalid credentials')
 }
 
-// Simple register function (placeholder)
-export async function register(email: string, password: string, userData?: any) {
-  // This is a placeholder - implement actual registration logic
-  console.log('Registration attempt for:', email)
-  return { success: false, error: 'Registration not implemented' }
+// Simple register function 
+export async function register(userData: {
+  email: string
+  password: string
+  fullName: string
+  phone?: string
+  role?: string
+  state?: string
+}) {
+  console.log('Registration attempt for:', userData.email)
+  
+  // For demo purposes, just validate the data
+  if (!userData.email || !userData.password || !userData.fullName) {
+    throw new Error('Missing required fields')
+  }
+  
+  if (userData.password.length < 8) {
+    throw new Error('Password must be at least 8 characters')
+  }
+  
+  // Simulate successful registration
+  return { 
+    success: true, 
+    message: 'Registration successful',
+    userId: 'demo-' + Date.now()
+  }
+}
+
+export async function logout() {
+  deleteSession()
 }
 
 export async function hashPassword(password: string): Promise<string> {

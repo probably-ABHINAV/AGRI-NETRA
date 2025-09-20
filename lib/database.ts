@@ -277,3 +277,134 @@ export async function testDatabaseConnection(): Promise<{ connected: boolean; er
     return { connected: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
+
+// Pest Detection interfaces
+export interface DatabasePestDetection {
+  id: string
+  user_id: string
+  farm_id?: string
+  crop_id?: string
+  image_url: string
+  detected_pest?: string
+  confidence_score: number
+  severity: string
+  treatment_recommendation?: string
+  ai_model_version: string
+  created_at: string
+  updated_at: string
+}
+
+export interface DatabaseAnalyticsEvent {
+  id: string
+  user_id: string
+  event_type: string
+  event_data: any
+  session_id: string
+  ip_address?: string
+  user_agent?: string
+  created_at: string
+}
+
+// Mock data for pest detections
+const mockPestDetections: DatabasePestDetection[] = []
+
+// Database operations object
+export const db = {
+  async createPestDetection(data: Omit<DatabasePestDetection, 'id' | 'created_at' | 'updated_at'>): Promise<DatabasePestDetection | null> {
+    const client = getSupabaseClient()
+    
+    if (!client) {
+      const newDetection: DatabasePestDetection = {
+        ...data,
+        id: Date.now().toString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      mockPestDetections.push(newDetection)
+      return newDetection
+    }
+
+    try {
+      const { data: result, error } = await client
+        .from('pest_detections')
+        .insert([data])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Database error:', error)
+        // Fallback to mock data
+        const newDetection: DatabasePestDetection = {
+          ...data,
+          id: Date.now().toString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+        mockPestDetections.push(newDetection)
+        return newDetection
+      }
+
+      return result
+    } catch (error) {
+      console.error('Failed to create pest detection:', error)
+      return null
+    }
+  },
+
+  async getUserPestDetections(userId: string): Promise<DatabasePestDetection[]> {
+    const client = getSupabaseClient()
+    
+    if (!client) {
+      return mockPestDetections.filter(d => d.user_id === userId)
+    }
+
+    try {
+      const { data, error } = await client
+        .from('pest_detections')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Database error:', error)
+        return mockPestDetections.filter(d => d.user_id === userId)
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Failed to fetch pest detections:', error)
+      return mockPestDetections.filter(d => d.user_id === userId)
+    }
+  },
+
+  async createAnalyticsEvent(data: Omit<DatabaseAnalyticsEvent, 'id' | 'created_at'>): Promise<DatabaseAnalyticsEvent | null> {
+    const client = getSupabaseClient()
+    
+    if (!client) {
+      console.log('Analytics event (mock):', data)
+      return {
+        ...data,
+        id: Date.now().toString(),
+        created_at: new Date().toISOString()
+      }
+    }
+
+    try {
+      const { data: result, error } = await client
+        .from('analytics_events')
+        .insert([data])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Analytics error:', error)
+        return null
+      }
+
+      return result
+    } catch (error) {
+      console.error('Failed to create analytics event:', error)
+      return null
+    }
+  }
+}

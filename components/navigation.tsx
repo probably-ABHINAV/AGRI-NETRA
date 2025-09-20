@@ -32,6 +32,13 @@ import {
 import LanguageSelector from '@/components/language-selector'
 import { useLanguage } from '@/hooks/use-language'
 import { logoutAction } from '@/app/actions/auth'
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu"
 
 function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

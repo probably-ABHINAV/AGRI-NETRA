@@ -1,66 +1,8 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types'
+import type { Database as DatabaseTypes } from '@/types'
 
-// Database schema types matching the actual Supabase schema
-export interface Database {
-  public: {
-    Tables: {
-      profiles: {
-        Row: {
-          id: string
-          email: string
-          full_name: string
-          phone?: string
-          role: 'farmer' | 'expert' | 'admin'
-          location?: string
-          farm_size?: number
-          experience_years?: number
-          preferred_language: string
-          avatar_url?: string
-          password_hash?: string
-          is_verified: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          email: string
-          full_name: string
-          phone?: string
-          role?: 'farmer' | 'expert' | 'admin'
-          location?: string
-          farm_size?: number
-          experience_years?: number
-          preferred_language?: string
-          avatar_url?: string
-          password_hash?: string
-          is_verified?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string
-          full_name?: string
-          phone?: string
-          role?: 'farmer' | 'expert' | 'admin'
-          location?: string
-          farm_size?: number
-          experience_years?: number
-          preferred_language?: string
-          avatar_url?: string
-          password_hash?: string
-          is_verified?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
-    }
-  }
-}
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase environment variables not configured. Using mock data.')
@@ -69,7 +11,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Export the createClient function for use in other modules
 export const createClient = () =>
   supabaseUrl && supabaseAnonKey
-  ? createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey)
+  ? createSupabaseClient<DatabaseTypes>(supabaseUrl, supabaseAnonKey)
   : null
 
 // Helper function to check if Supabase is available
@@ -79,7 +21,7 @@ export const isSupabaseConfigured = () => {
 
 // Create a default instance for server-side use
 export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey) 
+  ? createSupabaseClient<DatabaseTypes>(supabaseUrl, supabaseAnonKey) 
   : null
 
 // Server-side authentication helpers
@@ -129,7 +71,7 @@ export async function checkDatabaseHealth() {
   }
 
   try {
-    const { data, error } = await supabase.from('profiles').select('count').limit(1)
+    const { error } = await supabase.from('profiles').select('count').limit(1)
 
     if (error) {
       return { status: 'error', message: error.message }

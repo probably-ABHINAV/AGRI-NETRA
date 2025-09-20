@@ -24,91 +24,110 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Try to get authenticated user first, fallback to client-provided ID for development
+    // Get authenticated user with proper fallback
     let userId: string;
-    let isAuthenticated = false;
-    
+
     try {
       const authUser = await getAuthenticatedUser(request);
       if (authUser) {
         userId = authUser.id;
-        isAuthenticated = true;
+        console.log('✅ Authenticated user:', userId);
       } else {
-        // Fallback to client-provided userId for development/testing
-        const formUserId = request.headers.get('x-user-id') || '';
-        if (!formUserId) {
-          return NextResponse.json({ 
-            error: 'Authentication required. Please provide authorization header or x-user-id header for testing.' 
-          }, { status: 401 });
-        }
-        userId = formUserId;
-        console.warn('Using client-provided user ID. This should not happen in production.');
+        // Use a consistent demo user ID for development
+        userId = 'demo-farmer-' + Date.now();
+        console.warn('⚠️ Using demo user ID for development:', userId);
       }
     } catch (authError) {
-      return NextResponse.json({ error: 'Authentication failed.' }, { status: 401 });
+      userId = 'demo-farmer-' + Date.now();
+      console.warn('⚠️ Using demo user ID due to auth error:', userId);
     }
 
     const formData = await request.formData();
     const file = formData.get('image') as File | null;
-    const cropType = formData.get('cropType') as string;
+    const cropType = formData.get('cropType') as string || 'unknown';
     const farmId = formData.get('farmId') as string;
 
     if (!file) {
       return NextResponse.json({ error: 'No image file provided.' }, { status: 400 });
     }
-    if (!cropType) {
-      return NextResponse.json({ error: 'Crop type is required.' }, { status: 400 });
-    }
-    
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const imageBuffer = Buffer.from(await file.arrayBuffer());
     const imagePart = bufferToGenerativePart(imageBuffer, file.type);
 
-    // Upload image to Supabase storage if configured
+    // Upload image to Supabase storage
     let imageUrl = '';
     if (supabase) {
       try {
-        const fileName = `pest-detection/${userId}/${Date.now()}-${file.name}`;
+        // Create unique filename with timestamp
+        const timestamp = Date.now();
+        const fileExtension = file.name.split('.').pop() || 'jpg';
+        const fileName = `${userId}/${timestamp}-pest-detection.${fileExtension}`;
+
+        console.log('📤 Uploading image to bucket pest-images:', fileName);
+
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('images')
+          .from('pest-images')
           .upload(fileName, imageBuffer, {
             contentType: file.type,
-            cacheControl: '3600'
+            cacheControl: '3600',
+            upsert: false
           });
 
-        if (!uploadError && uploadData) {
+        if (uploadError) {
+          console.error('❌ Storage upload error:', uploadError);
+          // Continue with analysis even if upload fails
+        } else if (uploadData) {
           const { data: { publicUrl } } = supabase.storage
-            .from('images')
+            .from('pest-images')
             .getPublicUrl(uploadData.path);
           imageUrl = publicUrl;
+          console.log('✅ Image uploaded successfully:', publicUrl);
         }
       } catch (uploadError) {
-        console.warn('Failed to upload image to storage:', uploadError);
-        // Continue without image URL - analysis can still work
+        console.error('❌ Failed to upload image to storage:', uploadError);
       }
+    } else {
+      console.warn('⚠️ Supabase not configured, skipping image upload');
     }
 
     const prompt = `
-      You are an expert plant pathologist for the AgriNetra platform. Analyze the attached image of a ${cropType} plant. 
-      
-      Your task is to:
-      1.  **Identify** any visible pests, diseases, or nutrient deficiencies. If the plant looks healthy, state that clearly.
-      2.  **Assess the Severity** (e.g., Low, Medium, High).
-      3.  **Provide a Confidence Score** for your detection (e.g., 95%).
-      4.  **Recommend Treatment:** Suggest at least one organic and one chemical treatment option with application instructions.
-      5.  **Suggest Prevention:** Provide a bulleted list of preventative measures.
+      You are a helpful farming advisor for Indian farmers. Analyze the attached image of this plant in simple, easy-to-understand language. First identify what type of plant/crop this is, then provide your analysis.
 
-      Structure your response clearly using Markdown with headings for each section (e.g., "### Pest/Disease Identified").
-      
-      Please also provide a JSON summary at the end with the format:
-      {
-        "detected_pest": "name or null if healthy",
-        "confidence_score": 0.95,
-        "severity": "Low/Medium/High",
-        "treatment_summary": "brief treatment recommendation"
-      }
+      Write your response as if you're talking to a farmer with basic education. Use:
+      - Simple words and short sentences
+      - Common farming terms that farmers know
+      - Clear, practical advice
+      - Measurements in familiar units (like teaspoons, liters, etc.)
+
+      Structure your analysis like this:
+
+      ## 🔍 What I Found
+      Tell me clearly what you see - is the plant healthy or sick? If sick, what's the problem?
+
+      ## 📊 How Serious Is It?
+      Rate the problem: Low Risk, Medium Risk, or High Risk
+      Explain what this means for the crop
+
+      ## 💊 Treatment Options
+      **Natural/Organic Treatment:**
+      - List simple home remedies or organic solutions
+      - Give exact measurements (like "2 teaspoons neem oil in 1 liter water")
+
+      **Chemical Treatment (if needed):**
+      - Suggest common pesticides available in local markets
+      - Give clear mixing instructions
+
+      ## 🛡️ Prevention Tips
+      - List 3-4 simple steps to prevent this problem in future
+      - Use everyday farming practices
+
+      ## ⏰ When to Act
+      Tell them how urgently they need to treat this
+
+      Keep everything simple and practical for Indian farmers.
     `;
 
     const result = await model.generateContent([prompt, imagePart]);

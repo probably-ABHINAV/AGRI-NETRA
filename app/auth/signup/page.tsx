@@ -43,7 +43,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
             </Alert>
           )}
 
-          <form action="/api/auth/signup" method="POST" className="space-y-4">
+          <form action={registerAction} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>

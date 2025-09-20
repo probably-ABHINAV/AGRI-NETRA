@@ -60,8 +60,8 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // Clear invalid or expired session
-    if (!isAuthenticated && session) {
+    // Clear invalid or expired session - but only if we're not already on auth pages
+    if (!isAuthenticated && session && !isAuthRoute && !isPublicRoute) {
       response = NextResponse.redirect(new URL("/auth/login", request.url))
       response.cookies.set('session', '', { 
         expires: new Date(0),
@@ -101,22 +101,40 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error('Middleware error:', error)
     
-    // On error, redirect to login and clear session
-    const response = NextResponse.redirect(new URL("/auth/login", request.url))
-    response.cookies.set('session', '', { 
-      expires: new Date(0),
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/'
-    })
-    
-    // Add security headers even on error
-    Object.entries(securityHeaders).forEach(([key, value]) => {
-      response.headers.set(key, value)
-    })
-    
-    return response
+    // Only redirect to login on error if not already on auth/public routes
+    if (!isAuthRoute && !isPublicRoute) {
+      const response = NextResponse.redirect(new URL("/auth/login", request.url))
+      response.cookies.set('session', '', { 
+        expires: new Date(0),
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      })
+      
+      // Add security headers even on error
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value)
+      })
+      
+      return response
+    } else {
+      // If on auth/public routes, just continue with cleared session
+      const response = NextResponse.next()
+      response.cookies.set('session', '', { 
+        expires: new Date(0),
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      })
+      
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value)
+      })
+      
+      return response
+    }
   }
 }
 
