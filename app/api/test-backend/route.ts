@@ -1,8 +1,8 @@
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getUser } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
-
   try {
     // Get current user session
     const user = await getUser()
@@ -31,29 +31,30 @@ export async function GET(request: NextRequest) {
         expert: { email: "expert@example.com", password: "password123" },
         admin: { email: "admin@example.com", password: "password123" },
       },
+      environmentStatus: {
+        nodeEnv: process.env.NODE_ENV || 'development',
+        supabaseConfigured: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+        jwtSecret: !!process.env.JWT_SECRET,
+        geminiApiKey: !!process.env.GEMINI_API_KEY,
+        weatherApiKey: !!process.env.WEATHER_API_KEY,
+      }
     }
 
-    return NextResponse.json({
-      status: "✅ AgriNetra Backend Fully Operational",
-      timestamp: new Date().toISOString(),
-      tracing: {
-        highlight: "✅ Enabled",
-        opentelemetry: "✅ Enabled"
-      },
-      ...testData,
-      meta: {
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development',
-        version: '1.0.0'
+    return NextResponse.json(testData, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
       }
     })
-
   } catch (error) {
-    console.error('Backend test failed:', error)
-
-    return NextResponse.json({
-      status: 'error',
-      message: 'Backend test failed'
-    }, { status: 500 })
+    console.error('Backend test error:', error)
+    return NextResponse.json(
+      { 
+        error: 'Backend test failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
   }
 }

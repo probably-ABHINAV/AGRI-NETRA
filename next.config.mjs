@@ -1,20 +1,51 @@
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: process.env.NODE_ENV === 'development',
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.NODE_ENV === 'development',
   },
   images: {
     unoptimized: true,
   },
-  // Allow all hosts for Replit proxy environment
+  // Configure for production readiness
   experimental: {
     allowedRevalidateHeaderKeys: [],
   },
-  // Allow Replit origins for development
-  allowedDevOrigins: ['*.repl.co', '*.replit.dev', '127.0.0.1', '*.sisko.replit.dev'],
+  // Security headers for production
+  async headers() {
+    const headers = [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+    ]
+
+    // Add cache control for development
+    if (process.env.NODE_ENV === 'development') {
+      headers[0].headers.push({
+        key: 'Cache-Control',
+        value: 'no-cache, no-store, must-revalidate',
+      })
+    }
+
+    return headers
+  },
   // Configure for Replit environment
   webpack: (config, { isServer }) => {
     // Reduce webpack cache warnings
@@ -26,20 +57,6 @@ const nextConfig = {
   async rewrites() {
     return [];
   },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
-          },
-        ],
-      },
-    ]
-  },
-  // Allow all hosts - critical for Replit proxy
   async redirects() {
     return [];
   },

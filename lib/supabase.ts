@@ -1,4 +1,5 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types'
 
 // Database schema types matching the actual Supabase schema
 export interface Database {
@@ -119,6 +120,25 @@ export async function requireAuthentication(request: Request) {
     throw new Error('Authentication required')
   }
   return user
+}
+
+// Database health check
+export async function checkDatabaseHealth() {
+  if (!supabase) {
+    return { status: 'error', message: 'Supabase not configured' }
+  }
+
+  try {
+    const { data, error } = await supabase.from('profiles').select('count').limit(1)
+
+    if (error) {
+      return { status: 'error', message: error.message }
+    }
+
+    return { status: 'healthy', message: 'Database connection successful' }
+  } catch (error) {
+    return { status: 'error', message: error instanceof Error ? error.message : 'Unknown error' }
+  }
 }
 
 // Database types based on your schema

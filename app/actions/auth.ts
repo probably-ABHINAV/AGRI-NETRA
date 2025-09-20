@@ -45,7 +45,10 @@ export async function registerAction(formData: FormData) {
     const role = formData.get('role') as string
     const state = formData.get('state') as string
 
+    console.log('🔍 Registration attempt:', { email, password: password ? '[PRESENT]' : '[MISSING]', name, phone, role, state })
+
     if (!email || !password || !name) {
+      console.log('❌ Validation failed: missing required fields')
       redirect('/auth/signup?error=Email, password, and name are required')
     }
 
@@ -62,7 +65,15 @@ export async function registerAction(formData: FormData) {
     }
 
     // Register user in database
-    await register({
+    console.log('✅ Calling register function with data:', {
+      email,
+      fullName: name,
+      phone: phone || undefined,
+      role: role || 'farmer',
+      state: state || undefined
+    })
+    
+    const result = await register({
       email,
       password,
       fullName: name,
@@ -71,9 +82,10 @@ export async function registerAction(formData: FormData) {
       state: state || undefined
     })
 
+    console.log('✅ Registration successful:', result)
     redirect('/auth/login?message=Registration successful! Please login with your new credentials.')
   } catch (error) {
-    console.error('Registration error:', error)
+    console.error('❌ Registration error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Registration failed'
     redirect(`/auth/signup?error=${encodeURIComponent(errorMessage)}`)
   }
