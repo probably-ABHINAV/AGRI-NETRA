@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+
+export const runtime = 'nodejs'
 import { getUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase'
 

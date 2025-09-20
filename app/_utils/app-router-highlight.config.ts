@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 
 // Simple wrapper function without Highlight.io
 export const withAppRouterHighlight = (handler: any) => {

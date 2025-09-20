@@ -262,8 +262,8 @@ export default function AdminDashboard() {
                       <TrendingUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm text-green-600">
                         +
-                        {index > 0
-                          ? Math.round(((data.users - userGrowth[index - 1].users) / userGrowth[index - 1].users) * 100)
+                        {index > 0 && userGrowth[index - 1]
+                          ? Math.round(((data.users - userGrowth[index - 1]!.users) / userGrowth[index - 1]!.users) * 100)
                           : 0}
                         %
                       </span>

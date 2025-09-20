@@ -1,5 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
+
+export const runtime = 'nodejs'
 import { hashPassword, createSession, isValidEmail, isValidPassword, isValidPhone, sanitizeInput, checkRateLimit } from '@/lib/auth'
 import { createProfile } from '@/lib/database'
 import { z } from 'zod'
@@ -71,8 +73,8 @@ export async function POST(request: NextRequest) {
     const sanitizedName = sanitizeInput(name)
     const sanitizedLocation = location ? sanitizeInput(location) : undefined
 
-    // Hash password
-    const hashedPassword = await hashPassword(password)
+    // Hash password (for real implementation)
+    // const hashedPassword = await hashPassword(password)
 
     // Create user profile
     const profile = await createProfile({

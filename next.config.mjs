@@ -23,10 +23,7 @@ const nextConfig = {
   },
   
   // Performance optimization
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  },
+  // (moved to allowedDevOrigins section below)
   
   // Security headers for production
   async headers() {
@@ -132,10 +129,17 @@ const nextConfig = {
   output: 'standalone',
   trailingSlash: false,
   
-  // Development settings
+  // Development settings for Replit
   ...(process.env.NODE_ENV === 'development' && {
     reactStrictMode: true,
   }),
+  
+  // Allow cross-origin requests for Replit environment
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    allowedDevOrigins: ['localhost', '127.0.0.1', /\.repl\.co$/],
+  },
 }
 
 export default nextConfig

@@ -34,11 +34,11 @@ export async function POST(request: NextRequest) {
         console.log('✅ Authenticated user:', userId);
       } else {
         // Use a consistent demo user ID for development
-        userId = 'demo-farmer-' + Date.now();
+        userId = crypto.randomUUID();
         console.warn('⚠️ Using demo user ID for development:', userId);
       }
     } catch (authError) {
-      userId = 'demo-farmer-' + Date.now();
+      userId = crypto.randomUUID();
       console.warn('⚠️ Using demo user ID due to auth error:', userId);
     }
 
@@ -159,8 +159,8 @@ export async function POST(request: NextRequest) {
     try {
       const detectionData = {
         user_id: userId,
-        farm_id: farmId || null,
-        crop_id: null, // We don't have crop ID in this context
+        farm_id: farmId || undefined,
+        crop_id: undefined, // We don't have crop ID in this context
         image_url: imageUrl,
         detected_pest: detectedPest,
         confidence_score: confidenceScore,
@@ -188,8 +188,8 @@ export async function POST(request: NextRequest) {
           severity: severity
         },
         session_id: `session-${Date.now()}`, // Simple session tracking
-        ip_address: request.headers.get('x-forwarded-for') || request.ip,
-        user_agent: request.headers.get('user-agent')
+        ip_address: (request.headers.get('x-forwarded-for') || request.ip || '').split(',')[0].trim() || undefined,
+        user_agent: request.headers.get('user-agent') || undefined
       });
     } catch (analyticsError) {
       console.error('Failed to track analytics:', analyticsError);

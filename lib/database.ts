@@ -207,7 +207,7 @@ export async function createProfile(profile: Omit<DatabaseProfile, 'id' | 'creat
   try {
     const { data, error } = await client
       .from('profiles')
-      .insert([profile])
+      .insert(profile as any)
       .select()
       .single()
 
@@ -229,8 +229,9 @@ export async function updateProfile(id: string, updates: Partial<DatabaseProfile
   if (!client) {
     const index = mockProfiles.findIndex(p => p.id === id)
     if (index !== -1) {
-      mockProfiles[index] = { ...mockProfiles[index], ...updates, updated_at: new Date().toISOString() }
-      return mockProfiles[index]
+      const updated = { ...mockProfiles[index], ...updates, updated_at: new Date().toISOString() }
+      mockProfiles[index] = updated
+      return updated
     }
     return null
   }
@@ -238,7 +239,7 @@ export async function updateProfile(id: string, updates: Partial<DatabaseProfile
   try {
     const { data, error } = await client
       .from('profiles')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id', id)
       .select()
       .single()
@@ -327,7 +328,7 @@ export const db = {
     try {
       const { data: result, error } = await client
         .from('pest_detections')
-        .insert([data])
+        .insert(data as any)
         .select()
         .single()
 
@@ -392,7 +393,7 @@ export const db = {
     try {
       const { data: result, error } = await client
         .from('analytics_events')
-        .insert([data])
+        .insert(data as any)
         .select()
         .single()
 

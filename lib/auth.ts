@@ -28,7 +28,7 @@ export async function decrypt(session: string): Promise<SessionPayload | null> {
       algorithms: ['HS256'],
     })
 
-    return payload as SessionPayload
+    return payload as unknown as SessionPayload
   } catch (error) {
     console.warn('JWT verification failed:', error instanceof Error ? error.message : 'Unknown error')
     return null
